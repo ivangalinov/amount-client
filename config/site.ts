@@ -5,24 +5,16 @@ export const siteConfig = {
   description: "Make beautiful websites regardless of your design experience.",
   navItems: [
     {
-      label: "Home",
+      label: "Dashboard",
       href: "/",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Операции",
+      href: "/operations",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
-    },
-    {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
-      href: "/about",
+      label: "Категории",
+      href: "/categories",
     },
   ],
   navMenuItems: [
