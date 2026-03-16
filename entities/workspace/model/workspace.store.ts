@@ -4,6 +4,7 @@ import type {
   WorkspaceId,
   WorkspaceUser,
 } from "@/entities/workspace/model/types";
+import type { UserId } from "@/entities/user/model/types";
 import type { WorkspaceApi } from "@/entities/workspace/api/types";
 import { workspaceLocalStorageApi } from "@/entities/workspace/api/local-storage";
 import type { ListResult } from "@/shared/api/types";
@@ -113,6 +114,19 @@ export class WorkspaceStore {
         this.loading = false;
       });
     }
+  }
+
+  async addUserToWorkspace(payload: {
+    workspaceId: WorkspaceId;
+    userId: UserId;
+  }): Promise<WorkspaceUser> {
+    const wu = await this.api.addUserToWorkspace(payload);
+    runInAction(() => {
+      if (wu.workspaceId === this.activeWorkspace?.id) {
+        this.workspaceUsers.push(wu);
+      }
+    });
+    return wu;
   }
 }
 

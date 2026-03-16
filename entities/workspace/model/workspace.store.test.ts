@@ -199,4 +199,49 @@ describe("WorkspaceStore", () => {
       expect(store.loading).toBe(false);
     });
   });
+
+  describe("addUserToWorkspace", () => {
+    it("appends to workspaceUsers when added to active workspace", async () => {
+      const active: Workspace = { id: 1, name: "Личный" };
+      const wu: WorkspaceUser = { id: 1, userId: 10, workspaceId: 1 };
+      const api = createMockWorkspaceApi({
+        listWorkspaces: async () => ({ items: [active], total: 1 }),
+        getActiveWorkspace: async () => active,
+        listWorkspaceUsers: async () => [],
+        addUserToWorkspace: async () => wu,
+      });
+      store = new WorkspaceStore(api);
+      await store.loadWorkspaces();
+
+      expect(store.workspaceUsers).toEqual([]);
+
+      const result = await store.addUserToWorkspace({
+        workspaceId: 1,
+        userId: 10,
+      });
+
+      expect(result).toEqual(wu);
+      expect(store.workspaceUsers).toHaveLength(1);
+      expect(store.workspaceUsers[0]).toEqual(wu);
+    });
+
+    it("does not append to workspaceUsers when added to other workspace", async () => {
+      const active: Workspace = { id: 1, name: "Личный" };
+      const api = createMockWorkspaceApi({
+        listWorkspaces: async () => ({ items: [active], total: 1 }),
+        getActiveWorkspace: async () => active,
+        addUserToWorkspace: async () => ({
+          id: 1,
+          userId: 10,
+          workspaceId: 2,
+        }),
+      });
+      store = new WorkspaceStore(api);
+      await store.loadWorkspaces();
+
+      await store.addUserToWorkspace({ workspaceId: 2, userId: 10 });
+
+      expect(store.workspaceUsers).toEqual([]);
+    });
+  });
 });

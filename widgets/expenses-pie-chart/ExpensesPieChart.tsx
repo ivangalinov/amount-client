@@ -1,6 +1,13 @@
 "use client";
 
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
 export interface ExpensesPieChartItem {
   categoryId: number;
@@ -50,7 +57,7 @@ export function ExpensesPieChart({ data, height = 280 }: ExpensesPieChartProps) 
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) => [`${value.toFixed(2)}`, "Сумма"]}
+          formatter={(value: number, name: string) => [`${value.toFixed(2)}`, name]}
           contentStyle={{
             borderRadius: "8px",
             border: "1px solid var(--nextui-colors-default-200)",

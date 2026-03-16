@@ -13,19 +13,22 @@ import {
 import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { useRootStore } from "@/shared/store/root-store";
 import { OperationFormModal } from "@/features/operation-form";
+import { DateRangeFilter } from "@/shared/ui/DateRangeFilter";
+import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 import type { Operation } from "@/entities/operation/model/types";
 import type { Category } from "@/entities/category/model/types";
+import { AuthorDropdown } from "@/features/author-dropdown";
 
 export const OperationList = observer(function OperationList() {
   const { user, workspace, category: categoryStore, operation } = useRootStore();
 
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => getDefaultDateFrom());
+  const [dateTo, setDateTo] = useState(() => getDefaultDateTo());
   const [categoryId, setCategoryId] = useState<string>("");
+  const [authorId, setAuthorId] = useState<number | "">("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingOperation, setEditingOperation] = useState<Operation | null>(
     null
@@ -52,10 +55,12 @@ export const OperationList = observer(function OperationList() {
     if (!activeWorkspace) return;
     const params: {
       workspaceId?: number;
+      userId?: number;
       dateFrom?: string;
       dateTo?: string;
       categoryId?: number;
     } = { workspaceId: activeWorkspace.id };
+    if (authorId !== "") params.userId = authorId;
     if (dateFrom) params.dateFrom = new Date(dateFrom).toISOString();
     if (dateTo) {
       const d = new Date(dateTo);
@@ -64,7 +69,7 @@ export const OperationList = observer(function OperationList() {
     }
     if (categoryId) params.categoryId = Number(categoryId);
     void operation.loadOperations(params);
-  }, [activeWorkspace?.id, dateFrom, dateTo, categoryId, operation]);
+  }, [activeWorkspace?.id, authorId, dateFrom, dateTo, categoryId, operation]);
 
   const categories: Category[] = categoryStore.categories;
 
@@ -100,19 +105,17 @@ export const OperationList = observer(function OperationList() {
 
         <Card className="p-4">
           <div className="flex flex-wrap items-end gap-4">
-            <Input
-              type="date"
-              label="Дата с"
-              value={dateFrom}
-              onValueChange={setDateFrom}
-              classNames={{ base: "max-w-[180px]" }}
+            <DateRangeFilter
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              onPeriodChange={(from, to) => {
+                setDateFrom(from);
+                setDateTo(to);
+              }}
             />
-            <Input
-              type="date"
-              label="Дата по"
-              value={dateTo}
-              onValueChange={setDateTo}
-              classNames={{ base: "max-w-[180px]" }}
+            <AuthorDropdown
+              selectedUserId={authorId}
+              onAuthorChange={setAuthorId}
             />
             <Select
               label="Категория"

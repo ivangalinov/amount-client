@@ -3,32 +3,13 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { observer } from "mobx-react-lite";
-import { useRootStore } from "@/shared/store/root-store";
 import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
+import { useRootStore } from "@/shared/store/root-store";
+import { DateRangeFilter } from "@/shared/ui/DateRangeFilter";
+import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 
-const ExpensesPieChart = dynamic(
-  () =>
-    import("@/widgets/expenses-pie-chart").then((m) => m.ExpensesPieChart),
-  { ssr: false }
-);
-
-function getMonthStart(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}-01`;
-}
-
-function getMonthEnd(d: Date): string {
-  const next = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-  return next.toISOString().slice(0, 10);
-}
-
-function getToday(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+const ExpensesPieChart = dynamic(() => import("@/widgets/expenses-pie-chart").then((m) => m.ExpensesPieChart), { ssr: false });
 
 function formatMonth(ym: string): string {
   const [, m] = ym.split("-");
@@ -42,9 +23,8 @@ function formatMonth(ym: string): string {
 export const Dashboard = observer(function Dashboard() {
   const { user, workspace, stats } = useRootStore();
 
-  const now = new Date();
-  const [dateFrom, setDateFrom] = useState(() => getMonthStart(now));
-  const [dateTo, setDateTo] = useState(() => getToday());
+  const [dateFrom, setDateFrom] = useState(() => getDefaultDateFrom());
+  const [dateTo, setDateTo] = useState(() => getDefaultDateTo());
 
   useEffect(() => {
     void user.loadCurrentUser();
@@ -66,61 +46,18 @@ export const Dashboard = observer(function Dashboard() {
   const error = stats.error;
   const data = stats.dashboardStats;
 
-  const setCurrentMonth = () => {
-    const d = new Date();
-    setDateFrom(getMonthStart(d));
-    setDateTo(getToday());
-  };
-
-  const setLastMonth = () => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    setDateFrom(getMonthStart(d));
-    setDateTo(getMonthEnd(d));
-  };
-
-  const setLast30Days = () => {
-    const end = new Date();
-    const start = new Date(end);
-    start.setDate(start.getDate() - 29);
-    setDateFrom(start.toISOString().slice(0, 10));
-    setDateTo(end.toISOString().slice(0, 10));
-  };
-
   return (
     <section className="flex flex-col gap-6 py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-2xl font-semibold">Дашборд</h1>
-        <Card className="p-4 flex flex-wrap items-end gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              type="date"
-              label="С"
-              value={dateFrom}
-              onValueChange={setDateFrom}
-              size="sm"
-              classNames={{ base: "max-w-[140px]" }}
-            />
-            <Input
-              type="date"
-              label="По"
-              value={dateTo}
-              onValueChange={setDateTo}
-              size="sm"
-              classNames={{ base: "max-w-[140px]" }}
-            />
-          </div>
-          <div className="flex flex-wrap gap-1">
-            <Button size="sm" variant="flat" onPress={setCurrentMonth}>
-              Этот месяц
-            </Button>
-            <Button size="sm" variant="flat" onPress={setLastMonth}>
-              Прошлый месяц
-            </Button>
-            <Button size="sm" variant="flat" onPress={setLast30Days}>
-              30 дней
-            </Button>
-          </div>
-        </Card>
+        <DateRangeFilter
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          onPeriodChange={(from, to) => {
+            setDateFrom(from);
+            setDateTo(to);
+          }}
+        />
       </div>
 
       {loading && !data && (

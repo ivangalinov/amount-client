@@ -57,6 +57,8 @@ async function writeWorkspaceUsers(items: WorkspaceUser[]): Promise<void> {
   await writeJson(WORKSPACE_USERS_KEY, items);
 }
 
+const CURRENT_USER_KEY = "amount:currentUser";
+
 async function ensureDefaultWorkspace(): Promise<Workspace> {
   const workspaces = await readWorkspaces();
   const nextId = workspaces.length
@@ -69,6 +71,24 @@ async function ensureDefaultWorkspace(): Promise<Workspace> {
   workspaces.push(workspace);
   await writeWorkspaces(workspaces);
   await keyValueStorage.setItem(ACTIVE_WORKSPACE_KEY, String(workspace.id));
+
+  const currentUserIdRaw = await keyValueStorage.getItem(CURRENT_USER_KEY);
+  if (currentUserIdRaw) {
+    const userId = Number(currentUserIdRaw);
+    if (Number.isFinite(userId)) {
+      const wsUsers = await readWorkspaceUsers();
+      const nextWuId = wsUsers.length
+        ? Math.max(...wsUsers.map((wu) => wu.id)) + 1
+        : 1;
+      wsUsers.push({
+        id: nextWuId,
+        workspaceId: workspace.id,
+        userId,
+      });
+      await writeWorkspaceUsers(wsUsers);
+    }
+  }
+
   return workspace;
 }
 
