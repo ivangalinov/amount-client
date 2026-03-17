@@ -13,14 +13,13 @@ import {
 import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/select";
 import { useRootStore } from "@/shared/store/root-store";
 import { OperationFormModal } from "@/features/operation-form";
 import { DateRangeFilter } from "@/shared/ui/DateRangeFilter";
 import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 import type { Operation } from "@/entities/operation/model/types";
-import type { Category } from "@/entities/category/model/types";
 import { AuthorDropdown } from "@/features/author-dropdown";
+import { CategoryFilter } from "@/features/category-filter";
 
 export const OperationList = observer(function OperationList() {
   const { user, workspace, category: categoryStore, operation } = useRootStore();
@@ -37,8 +36,7 @@ export const OperationList = observer(function OperationList() {
   const loadData = useCallback(() => {
     void user.loadCurrentUser();
     void workspace.loadWorkspaces();
-    void categoryStore.loadCategories();
-  }, [user, workspace, categoryStore]);
+  }, [user, workspace]);
 
   useEffect(() => {
     loadData();
@@ -71,8 +69,6 @@ export const OperationList = observer(function OperationList() {
     void operation.loadOperations(params);
   }, [activeWorkspace?.id, authorId, dateFrom, dateTo, categoryId, operation]);
 
-  const categories: Category[] = categoryStore.categories;
-
   const openCreate = () => {
     setEditingOperation(null);
     setModalOpen(true);
@@ -104,7 +100,15 @@ export const OperationList = observer(function OperationList() {
         </div>
 
         <Card className="p-4">
-          <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <AuthorDropdown
+              selectedUserId={authorId}
+              onAuthorChange={setAuthorId}
+            />
+            <CategoryFilter
+              selectedCategoryId={categoryId}
+              onCategoryChange={setCategoryId}
+            />
             <DateRangeFilter
               dateFrom={dateFrom}
               dateTo={dateTo}
@@ -113,32 +117,6 @@ export const OperationList = observer(function OperationList() {
                 setDateTo(to);
               }}
             />
-            <AuthorDropdown
-              selectedUserId={authorId}
-              onAuthorChange={setAuthorId}
-            />
-            <Select
-              label="Категория"
-              placeholder="Все категории"
-              selectedKeys={categoryId ? [categoryId] : []}
-              onSelectionChange={(keys) => {
-                const v = Array.from(keys)[0];
-                setCategoryId(v != null ? String(v) : "");
-              }}
-              classNames={{ base: "max-w-[200px]" }}
-            >
-              {categories.map((cat) => (
-                <SelectItem key={String(cat.id)} textValue={cat.name}>
-                  <span className="flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    {cat.name}
-                  </span>
-                </SelectItem>
-              ))}
-            </Select>
           </div>
         </Card>
 

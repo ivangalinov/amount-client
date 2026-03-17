@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { observer } from "mobx-react-lite";
 import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { useRootStore } from "@/shared/store/root-store";
 import { DateRangeFilter } from "@/shared/ui/DateRangeFilter";
 import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
-
-const ExpensesPieChart = dynamic(() => import("@/widgets/expenses-pie-chart").then((m) => m.ExpensesPieChart), { ssr: false });
+import { CategoryStatsCard } from "@/widgets/category-stats-card";
 
 function formatMonth(ym: string): string {
   const [, m] = ym.split("-");
@@ -93,65 +91,16 @@ export const Dashboard = observer(function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-4">
-          <h2 className="text-lg font-medium mb-3">Расходы по категориям</h2>
-          <ExpensesPieChart
-            data={data?.expensesByCategory ?? []}
-            height={280}
-          />
-          {(data?.expensesByCategory?.length ?? 0) > 0 && (
-            <ul className="mt-4 pt-4 border-t border-default-200 space-y-2">
-              {(data?.expensesByCategory ?? []).map(
-                ({ categoryId, name, color, sum }) => (
-                  <li
-                    key={categoryId}
-                    className="flex items-center justify-between gap-2 text-sm"
-                  >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="truncate">{name}</span>
-                    </span>
-                    <span className="text-danger font-medium shrink-0">
-                      {sum.toFixed(2)}
-                    </span>
-                  </li>
-                )
-              )}
-            </ul>
-          )}
-        </Card>
-
-        <Card className="p-4">
-          <h2 className="text-lg font-medium mb-3">Доходы по категориям</h2>
-          {(data?.incomeByCategory?.length ?? 0) === 0 ? (
-            <p className="text-sm text-default-400">Нет доходов за период</p>
-          ) : (
-            <ul className="space-y-2">
-              {(data?.incomeByCategory ?? []).map(
-                ({ categoryId, name, color, sum }) => (
-                  <li
-                    key={categoryId}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="truncate">{name}</span>
-                    </span>
-                    <span className="text-success font-medium shrink-0">
-                      +{sum.toFixed(2)}
-                    </span>
-                  </li>
-                )
-              )}
-            </ul>
-          )}
-        </Card>
+        <CategoryStatsCard
+          title="Расходы по категориям"
+          items={data?.expensesByCategory ?? []}
+          variant="expense"
+        />
+        <CategoryStatsCard
+          title="Доходы по категориям"
+          items={data?.incomeByCategory ?? []}
+          variant="income"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

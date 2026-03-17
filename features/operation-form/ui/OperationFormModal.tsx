@@ -38,6 +38,9 @@ const OperationFormModal = observer(function OperationFormModal({
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
 
   const isEdit = editOperation != null;
   const categories: Category[] = categoryStore.categories;
@@ -58,6 +61,9 @@ const OperationFormModal = observer(function OperationFormModal({
       setCreatedAt(new Date().toISOString().slice(0, 16));
     }
     setError(null);
+    setAmountError(null);
+    setTitleError(null);
+    setCategoryError(null);
   }, [isOpen, editOperation]);
 
   const currentUser = user.currentUser;
@@ -65,18 +71,28 @@ const OperationFormModal = observer(function OperationFormModal({
 
   const handleSubmit = async () => {
     setError(null);
+    setAmountError(null);
+    setTitleError(null);
+    setCategoryError(null);
+
     const numAmount = Number.parseFloat(amount);
+    let hasValidationError = false;
+
     if (Number.isNaN(numAmount)) {
-      setError("Введите корректную сумму");
-      return;
+      setAmountError("Введите корректную сумму");
+      hasValidationError = true;
     }
     if (!title.trim()) {
-      setError("Введите название");
-      return;
+      setTitleError("Введите название");
+      hasValidationError = true;
     }
     const catId = Number(categoryId);
     if (!catId) {
-      setError("Выберите категорию");
+      setCategoryError("Выберите категорию");
+      hasValidationError = true;
+    }
+
+    if (hasValidationError) {
       return;
     }
     if (!currentUser || !activeWorkspace) {
@@ -132,14 +148,24 @@ const OperationFormModal = observer(function OperationFormModal({
                 label="Сумма"
                 placeholder="например -500 или 1000"
                 value={amount}
-                onValueChange={setAmount}
+                onValueChange={(value) => {
+                  setAmount(value);
+                  if (amountError) setAmountError(null);
+                }}
                 autoFocus
+                isInvalid={!!amountError}
+                errorMessage={amountError}
               />
               <Input
                 label="Название"
                 placeholder="Описание операции"
                 value={title}
-                onValueChange={setTitle}
+                onValueChange={(value) => {
+                  setTitle(value);
+                  if (titleError) setTitleError(null);
+                }}
+                isInvalid={!!titleError}
+                errorMessage={titleError}
               />
               <Select
                 label="Категория"
@@ -149,6 +175,8 @@ const OperationFormModal = observer(function OperationFormModal({
                   const v = Array.from(keys)[0];
                   setCategoryId(v != null ? String(v) : "");
                 }}
+                isInvalid={!!categoryError}
+                errorMessage={categoryError}
               >
                 {categories.map((cat) => (
                   <SelectItem key={String(cat.id)} textValue={cat.name}>
