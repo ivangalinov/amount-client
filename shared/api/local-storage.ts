@@ -1,10 +1,10 @@
 import { isBrowser } from "@/shared/lib/runtime";
-import type { KeyValueStorage } from "@/shared/api/types";
+import type { IKeyValueStorage } from "@/shared/api/types";
 
 // A thin Promise-based wrapper around window.localStorage.
 // On the server (SSR) it becomes a no-op in-memory store.
 
-class BrowserLocalStorage implements KeyValueStorage {
+class BrowserLocalStorage implements IKeyValueStorage {
   async getItem(key: string): Promise<string | null> {
     if (!isBrowser) return null;
     return window.localStorage.getItem(key);
@@ -22,7 +22,7 @@ class BrowserLocalStorage implements KeyValueStorage {
 }
 
 // Simple in-memory fallback (used on server or if window.localStorage is unavailable)
-class MemoryStorage implements KeyValueStorage {
+class MemoryStorage implements IKeyValueStorage {
   private store = new Map<string, string>();
 
   async getItem(key: string): Promise<string | null> {
@@ -38,7 +38,7 @@ class MemoryStorage implements KeyValueStorage {
   }
 }
 
-export const keyValueStorage: KeyValueStorage = isBrowser
+export const keyValueStorage: IKeyValueStorage = isBrowser
   ? new BrowserLocalStorage()
   : new MemoryStorage();
 

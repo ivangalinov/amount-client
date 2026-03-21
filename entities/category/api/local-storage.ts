@@ -1,35 +1,35 @@
 import type {
-  Category,
+  ICategory,
   CategoryId,
   CategoryType,
 } from "@/entities/category/model/types";
-import type { CategoryApi, CategoryCreatePayload, CategoryListParams, CategoryUpdatePayload } from "@/entities/category/api/types";
+import type { ICategoryApi, ICategoryCreatePayload, ICategoryListParams, ICategoryUpdatePayload } from "@/entities/category/api/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { ListResult } from "@/shared/api/types";
+import type { IListResult } from "@/shared/api/types";
 
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const CATEGORIES_KEY = "amount:categories";
 
-async function readCategories(): Promise<Category[]> {
+async function readCategories(): Promise<ICategory[]> {
   const raw = await keyValueStorage.getItem(CATEGORIES_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Category[];
+    return JSON.parse(raw) as ICategory[];
   } catch {
     return [];
   }
 }
 
-async function writeCategories(categories: Category[]): Promise<void> {
+async function writeCategories(categories: ICategory[]): Promise<void> {
   await keyValueStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
 }
 
 function filterCategories(
-  categories: Category[],
-  params?: CategoryListParams,
-): Category[] {
+  categories: ICategory[],
+  params?: ICategoryListParams,
+): ICategory[] {
   if (!params) return categories;
   return categories.filter((c) => {
     if (params.workspaceId != null && c.workspaceId !== params.workspaceId) {
@@ -45,7 +45,7 @@ function filterCategories(
   });
 }
 
-function paginate<T>(items: T[], params?: CategoryListParams): ListResult<T> {
+function paginate<T>(items: T[], params?: ICategoryListParams): IListResult<T> {
   const { limit, offset } = params ?? {};
   if (limit == null && offset == null) {
     return { items, total: items.length };
@@ -58,27 +58,27 @@ function paginate<T>(items: T[], params?: CategoryListParams): ListResult<T> {
   };
 }
 
-export const categoryLocalStorageApi: CategoryApi = {
+export const categoryLocalStorageApi: ICategoryApi = {
   async listCategories(
-    params?: CategoryListParams,
-  ): Promise<ListResult<Category>> {
+    params?: ICategoryListParams,
+  ): Promise<IListResult<ICategory>> {
     const all = await readCategories();
     const filtered = filterCategories(all, params);
     return paginate(filtered, params);
   },
 
-  async getCategoryById(id: CategoryId): Promise<Category | null> {
+  async getCategoryById(id: CategoryId): Promise<ICategory | null> {
     const categories = await readCategories();
     return categories.find((c) => c.id === id) ?? null;
   },
 
-  async createCategory(payload: CategoryCreatePayload): Promise<Category> {
+  async createCategory(payload: ICategoryCreatePayload): Promise<ICategory> {
     const categories = await readCategories();
     const nextId = categories.length
       ? Math.max(...categories.map((c) => c.id)) + 1
       : 1;
 
-    const category: Category = {
+    const category: ICategory = {
       id: nextId,
       name: payload.name,
       workspaceId: payload.workspaceId as WorkspaceId,
@@ -93,14 +93,14 @@ export const categoryLocalStorageApi: CategoryApi = {
     return category;
   },
 
-  async updateCategory(payload: CategoryUpdatePayload): Promise<Category> {
+  async updateCategory(payload: ICategoryUpdatePayload): Promise<ICategory> {
     const categories = await readCategories();
     const idx = categories.findIndex((c) => c.id === payload.id);
     if (idx === -1) {
       throw new Error("Category not found");
     }
 
-    const updated: Category = {
+    const updated: ICategory = {
       ...categories[idx],
       ...payload,
     };

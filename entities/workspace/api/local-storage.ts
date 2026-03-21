@@ -1,11 +1,11 @@
 import type {
-  Workspace,
+  IWorkspace,
   WorkspaceId,
-  WorkspaceUser,
+  IWorkspaceUser,
 } from "@/entities/workspace/model/types";
-import type { WorkspaceApi } from "@/entities/workspace/api/types";
+import type { IWorkspaceApi } from "@/entities/workspace/api/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { ListParams, ListResult } from "@/shared/api/types";
+import type { IListParams, IListResult } from "@/shared/api/types";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const WORKSPACES_KEY = "amount:workspaces";
@@ -28,7 +28,7 @@ async function writeJson<T>(key: string, value: T): Promise<void> {
   await keyValueStorage.setItem(key, JSON.stringify(value));
 }
 
-function paginate<T>(items: T[], params?: ListParams): ListResult<T> {
+function paginate<T>(items: T[], params?: IListParams): IListResult<T> {
   const { limit, offset } = params ?? {};
   if (limit == null && offset == null) {
     return { items, total: items.length };
@@ -41,30 +41,30 @@ function paginate<T>(items: T[], params?: ListParams): ListResult<T> {
   };
 }
 
-async function readWorkspaces(): Promise<Workspace[]> {
-  return (await readJson<Workspace[]>(WORKSPACES_KEY)) ?? [];
+async function readWorkspaces(): Promise<IWorkspace[]> {
+  return (await readJson<IWorkspace[]>(WORKSPACES_KEY)) ?? [];
 }
 
-async function writeWorkspaces(items: Workspace[]): Promise<void> {
+async function writeWorkspaces(items: IWorkspace[]): Promise<void> {
   await writeJson(WORKSPACES_KEY, items);
 }
 
-async function readWorkspaceUsers(): Promise<WorkspaceUser[]> {
-  return (await readJson<WorkspaceUser[]>(WORKSPACE_USERS_KEY)) ?? [];
+async function readWorkspaceUsers(): Promise<IWorkspaceUser[]> {
+  return (await readJson<IWorkspaceUser[]>(WORKSPACE_USERS_KEY)) ?? [];
 }
 
-async function writeWorkspaceUsers(items: WorkspaceUser[]): Promise<void> {
+async function writeWorkspaceUsers(items: IWorkspaceUser[]): Promise<void> {
   await writeJson(WORKSPACE_USERS_KEY, items);
 }
 
 const CURRENT_USER_KEY = "amount:currentUser";
 
-async function ensureDefaultWorkspace(): Promise<Workspace> {
+async function ensureDefaultWorkspace(): Promise<IWorkspace> {
   const workspaces = await readWorkspaces();
   const nextId = workspaces.length
     ? Math.max(...workspaces.map((w) => w.id)) + 1
     : 1;
-  const workspace: Workspace = {
+  const workspace: IWorkspace = {
     id: nextId,
     name: DEFAULT_WORKSPACE_NAME,
   };
@@ -92,8 +92,8 @@ async function ensureDefaultWorkspace(): Promise<Workspace> {
   return workspace;
 }
 
-export const workspaceLocalStorageApi: WorkspaceApi = {
-  async listWorkspaces(params?: ListParams): Promise<ListResult<Workspace>> {
+export const workspaceLocalStorageApi: IWorkspaceApi = {
+  async listWorkspaces(params?: IListParams): Promise<IListResult<IWorkspace>> {
     let workspaces = await readWorkspaces();
     if (workspaces.length === 0) {
       await ensureDefaultWorkspace();
@@ -102,12 +102,12 @@ export const workspaceLocalStorageApi: WorkspaceApi = {
     return paginate(workspaces, params);
   },
 
-  async createWorkspace(payload: { name: string }): Promise<Workspace> {
+  async createWorkspace(payload: { name: string }): Promise<IWorkspace> {
     const workspaces = await readWorkspaces();
     const nextId = workspaces.length
       ? Math.max(...workspaces.map((w) => w.id)) + 1
       : 1;
-    const workspace: Workspace = {
+    const workspace: IWorkspace = {
       id: nextId,
       name: payload.name,
     };
@@ -123,12 +123,12 @@ export const workspaceLocalStorageApi: WorkspaceApi = {
     return workspace;
   },
 
-  async getWorkspaceById(id: WorkspaceId): Promise<Workspace | null> {
+  async getWorkspaceById(id: WorkspaceId): Promise<IWorkspace | null> {
     const workspaces = await readWorkspaces();
     return workspaces.find((w) => w.id === id) ?? null;
   },
 
-  async getActiveWorkspace(): Promise<Workspace | null> {
+  async getActiveWorkspace(): Promise<IWorkspace | null> {
     const raw = await keyValueStorage.getItem(ACTIVE_WORKSPACE_KEY);
     let workspaces = await readWorkspaces();
     if (workspaces.length === 0) {
@@ -150,7 +150,7 @@ export const workspaceLocalStorageApi: WorkspaceApi = {
     await keyValueStorage.setItem(ACTIVE_WORKSPACE_KEY, String(workspaceId));
   },
 
-  async listWorkspaceUsers(workspaceId: WorkspaceId): Promise<WorkspaceUser[]> {
+  async listWorkspaceUsers(workspaceId: WorkspaceId): Promise<IWorkspaceUser[]> {
     const wsUsers = await readWorkspaceUsers();
     return wsUsers.filter((wu) => wu.workspaceId === workspaceId);
   },
@@ -158,13 +158,13 @@ export const workspaceLocalStorageApi: WorkspaceApi = {
   async addUserToWorkspace(payload: {
     workspaceId: WorkspaceId;
     userId: UserId;
-  }): Promise<WorkspaceUser> {
+  }): Promise<IWorkspaceUser> {
     const wsUsers = await readWorkspaceUsers();
     const nextId = wsUsers.length
       ? Math.max(...wsUsers.map((w) => w.id)) + 1
       : 1;
 
-    const record: WorkspaceUser = {
+    const record: IWorkspaceUser = {
       id: nextId,
       workspaceId: payload.workspaceId,
       userId: payload.userId,

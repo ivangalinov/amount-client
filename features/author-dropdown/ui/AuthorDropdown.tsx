@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useRootStore } from "@/shared/store/root-store";
-import type { User } from "@/entities/user/model/types";
+import type { IUser } from "@/entities/user/model/types";
 import { AuthorDropdown as AuthorDropdownUI } from "@/entities/user/ui/dropdown";
 
-export interface AuthorDropdownProps {
+export interface IAuthorDropdownProps {
   /** Выбранный автор (пустая строка = все авторы) */
   selectedUserId: number | "";
   /** Обработчик смены автора */
@@ -25,7 +25,7 @@ export const AuthorDropdown = observer(function AuthorDropdown({
   label,
   placeholder,
   classNames,
-}: AuthorDropdownProps) {
+}: IAuthorDropdownProps) {
   const { user, workspace } = useRootStore();
   const activeWorkspace = workspace.activeWorkspace;
 
@@ -50,9 +50,9 @@ export const AuthorDropdown = observer(function AuthorDropdown({
     workspace.workspaceUsers.forEach((wu) => void user.loadUserById(wu.userId));
   }, [workspace.workspaceUsers, user]);
 
-  const users: User[] = [...workspace.workspaceUsers]
+  const users: IUser[] = [...workspace.workspaceUsers]
     .map((wu) => user.usersById.get(wu.userId))
-    .filter((u): u is User => u != null)
+    .filter((u): u is IUser => u != null)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (

@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Card } from "@heroui/card";
 import { Button } from "@heroui/button";
-import type { CategoryStatItem } from "@/entities/stats/model/types";
+import type { ICategoryStatItem } from "@/entities/stats/model/types";
 
 const CategoryPieChart = dynamic(
   () =>
@@ -22,11 +22,11 @@ export type CategoryStatsVariant = "expense" | "income";
 
 export type CategoryStatsChartMode = "pie" | "bar";
 
-export interface CategoryStatsCardProps {
+export interface ICategoryStatsCardProps {
   /** Заголовок карточки */
   title: string;
   /** Данные по категориям (расходы или доходы) */
-  items: CategoryStatItem[];
+  items: ICategoryStatItem[];
   /** Вариант: цвет сумм и текст пустого состояния */
   variant: CategoryStatsVariant;
   /** Высота диаграммы */
@@ -51,7 +51,7 @@ export function CategoryStatsCard({
   items,
   variant,
   chartHeight = 280,
-}: CategoryStatsCardProps) {
+}: ICategoryStatsCardProps) {
   const config = variantConfig[variant];
   const [chartMode, setChartMode] = useState<CategoryStatsChartMode>("pie");
 

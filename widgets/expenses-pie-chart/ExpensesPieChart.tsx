@@ -9,19 +9,19 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-export interface ExpensesPieChartItem {
+export interface IExpensesPieChartItem {
   categoryId: number;
   name: string;
   color: string;
   sum: number;
 }
 
-interface ExpensesPieChartProps {
-  data: ExpensesPieChartItem[];
+interface IExpensesPieChartProps {
+  data: IExpensesPieChartItem[];
   height?: number;
 }
 
-export function ExpensesPieChart({ data, height = 280 }: ExpensesPieChartProps) {
+export function ExpensesPieChart({ data, height = 280 }: IExpensesPieChartProps) {
   const chartData = data.map((item) => ({
     name: item.name,
     value: Math.abs(item.sum),

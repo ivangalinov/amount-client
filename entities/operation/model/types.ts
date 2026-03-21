@@ -4,7 +4,7 @@ import type { WorkspaceId } from "@/entities/workspace/model/types";
 
 export type OperationId = number;
 
-export interface Operation {
+export interface IOperation {
   id: OperationId;
   amount: number;
   categoryId: CategoryId;

@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { Category, CategoryId } from "@/entities/category/model/types";
+import type { ICategory, CategoryId } from "@/entities/category/model/types";
 import { CategoryType } from "@/entities/category/model/types";
-import type { CategoryApi } from "@/entities/category/api/types";
+import type { ICategoryApi } from "@/entities/category/api/types";
 import { CategoryStore } from "@/entities/category/model/category.store";
 
 function createMockCategoryApi(overrides: Partial<{
-  listCategories: CategoryApi["listCategories"];
-  createCategory: CategoryApi["createCategory"];
-  updateCategory: CategoryApi["updateCategory"];
-  deleteCategory: CategoryApi["deleteCategory"];
-}> = {}): CategoryApi {
+  listCategories: ICategoryApi["listCategories"];
+  createCategory: ICategoryApi["createCategory"];
+  updateCategory: ICategoryApi["updateCategory"];
+  deleteCategory: ICategoryApi["deleteCategory"];
+}> = {}): ICategoryApi {
   return {
     listCategories: async () => ({ items: [], total: 0 }),
     getCategoryById: async () => null,
@@ -53,7 +53,7 @@ describe("CategoryStore", () => {
 
   describe("loadCategories", () => {
     it("sets categories from API", async () => {
-      const categories: Category[] = [
+      const categories: ICategory[] = [
         {
           id: 1,
           name: "Еда",
@@ -141,7 +141,7 @@ describe("CategoryStore", () => {
 
   describe("updateCategory", () => {
     it("updates existing category in list", async () => {
-      const initial: Category[] = [
+      const initial: ICategory[] = [
         {
           id: 1,
           name: "Еда",
@@ -168,7 +168,7 @@ describe("CategoryStore", () => {
     });
 
     it("sets error and rethrows when API throws, list unchanged", async () => {
-      const initial: Category[] = [
+      const initial: ICategory[] = [
         {
           id: 1,
           name: "Еда",
@@ -199,7 +199,7 @@ describe("CategoryStore", () => {
 
   describe("deleteCategory", () => {
     it("removes category from list", async () => {
-      const initial: Category[] = [
+      const initial: ICategory[] = [
         {
           id: 1,
           name: "Еда",
@@ -222,7 +222,7 @@ describe("CategoryStore", () => {
     });
 
     it("sets error and rethrows when API throws, list unchanged", async () => {
-      const initial: Category[] = [
+      const initial: ICategory[] = [
         {
           id: 1,
           name: "Еда",
@@ -251,7 +251,7 @@ describe("CategoryStore", () => {
 
   describe("getCategoriesByType", () => {
     it("filters categories by type", async () => {
-      const categories: Category[] = [
+      const categories: ICategory[] = [
         {
           id: 1,
           name: "Еда",

@@ -1,22 +1,22 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import type { DashboardStats } from "@/entities/stats/model/types";
-import type { StatsApi } from "@/entities/stats/api/types";
-import type { DashboardStatsParams } from "@/entities/stats/api/types";
+import type { IDashboardStats } from "@/entities/stats/model/types";
+import type { IStatsApi } from "@/entities/stats/api/types";
+import type { IDashboardStatsParams } from "@/entities/stats/api/types";
 import { statsLocalStorageApi } from "@/entities/stats/api/local-storage";
 
 export class StatsStore {
-  private api: StatsApi;
+  private api: IStatsApi;
 
-  dashboardStats: DashboardStats | null = null;
+  dashboardStats: IDashboardStats | null = null;
   loading = false;
   error: string | null = null;
 
-  constructor(api: StatsApi = statsLocalStorageApi) {
+  constructor(api: IStatsApi = statsLocalStorageApi) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  async loadDashboardStats(params: DashboardStatsParams): Promise<void> {
+  async loadDashboardStats(params: IDashboardStatsParams): Promise<void> {
     this.loading = true;
     this.error = null;
     try {

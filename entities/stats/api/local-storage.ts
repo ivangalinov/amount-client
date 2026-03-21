@@ -1,39 +1,39 @@
-import type { Operation } from "@/entities/operation/model/types";
-import type { Category } from "@/entities/category/model/types";
+import type { IOperation } from "@/entities/operation/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 import type { CategoryId } from "@/entities/category/model/types";
-import type { DashboardStats, CategoryStatItem, DayStatItem, MonthStatItem } from "@/entities/stats/model/types";
-import type { StatsApi, DashboardStatsParams } from "@/entities/stats/api/types";
+import type { IDashboardStats, ICategoryStatItem, IDayStatItem, IMonthStatItem } from "@/entities/stats/model/types";
+import type { IStatsApi, IDashboardStatsParams } from "@/entities/stats/api/types";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const OPERATIONS_KEY = "amount:operations";
 const CATEGORIES_KEY = "amount:categories";
 
-async function readOperations(): Promise<Operation[]> {
+async function readOperations(): Promise<IOperation[]> {
   const raw = await keyValueStorage.getItem(OPERATIONS_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Operation[];
+    return JSON.parse(raw) as IOperation[];
   } catch {
     return [];
   }
 }
 
-async function readCategories(): Promise<Category[]> {
+async function readCategories(): Promise<ICategory[]> {
   const raw = await keyValueStorage.getItem(CATEGORIES_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Category[];
+    return JSON.parse(raw) as ICategory[];
   } catch {
     return [];
   }
 }
 
-function buildCategoriesById(categories: Category[]): Map<CategoryId, Category> {
+function buildCategoriesById(categories: ICategory[]): Map<CategoryId, ICategory> {
   return new Map(categories.map((c) => [c.id, c]));
 }
 
-export const statsLocalStorageApi: StatsApi = {
-  async getDashboardStats(params: DashboardStatsParams): Promise<DashboardStats> {
+export const statsLocalStorageApi: IStatsApi = {
+  async getDashboardStats(params: IDashboardStatsParams): Promise<IDashboardStats> {
     const [operations, categories] = await Promise.all([
       readOperations(),
       readCategories(),
@@ -81,7 +81,7 @@ export const statsLocalStorageApi: StatsApi = {
       }
     }
 
-    const expensesByCategory: CategoryStatItem[] = Array.from(
+    const expensesByCategory: ICategoryStatItem[] = Array.from(
       expensesByCategoryMap.entries()
     )
       .map(([categoryId, sum]) => ({
@@ -92,7 +92,7 @@ export const statsLocalStorageApi: StatsApi = {
       }))
       .sort((a, b) => a.sum - b.sum);
 
-    const incomeByCategory: CategoryStatItem[] = Array.from(
+    const incomeByCategory: ICategoryStatItem[] = Array.from(
       incomeByCategoryMap.entries()
     )
       .map(([categoryId, sum]) => ({
@@ -103,11 +103,11 @@ export const statsLocalStorageApi: StatsApi = {
       }))
       .sort((a, b) => b.sum - a.sum);
 
-    const expensesByDay: DayStatItem[] = Array.from(expensesByDayMap.entries())
+    const expensesByDay: IDayStatItem[] = Array.from(expensesByDayMap.entries())
       .map(([day, sum]) => ({ day, sum }))
       .sort((a, b) => a.day.localeCompare(b.day));
 
-    const expensesByMonth: MonthStatItem[] = Array.from(
+    const expensesByMonth: IMonthStatItem[] = Array.from(
       expensesByMonthMap.entries()
     )
       .map(([month, sum]) => ({ month, sum }))

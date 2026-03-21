@@ -26,8 +26,8 @@ export default function DefaultLayout({
           href="https://www.heroui.com"
           title="heroui.com homepage"
         >
-          <span className="text-default-600">Powered by</span>
-          <p className="text-primary">HeroUI</p>
+          {/* <span className="text-default-600">Powered by</span> */}
+          {/* <p className="text-primary">HeroUI</p> */}
         </Link>
       </footer>
     </div>

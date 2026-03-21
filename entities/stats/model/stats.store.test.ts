@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { DashboardStats } from "@/entities/stats/model/types";
-import type { StatsApi, DashboardStatsParams } from "@/entities/stats/api/types";
+import type { IDashboardStats } from "@/entities/stats/model/types";
+import type { IStatsApi, IDashboardStatsParams } from "@/entities/stats/api/types";
 import { StatsStore } from "@/entities/stats/model/stats.store";
 
 function createMockStatsApi(overrides: Partial<{
-  getDashboardStats: StatsApi["getDashboardStats"];
-}> = {}): StatsApi {
+  getDashboardStats: IStatsApi["getDashboardStats"];
+}> = {}): IStatsApi {
   return {
-    getDashboardStats: async (_params: DashboardStatsParams): Promise<DashboardStats> => ({
+    getDashboardStats: async (_params: IDashboardStatsParams): Promise<IDashboardStats> => ({
       balance: 0,
       totalIncome: 0,
       totalExpense: 0,
@@ -37,7 +37,7 @@ describe("StatsStore", () => {
 
   describe("loadDashboardStats", () => {
     it("sets dashboardStats from API", async () => {
-      const stats: DashboardStats = {
+      const stats: IDashboardStats = {
         balance: 500,
         totalIncome: 2000,
         totalExpense: -1500,
@@ -91,7 +91,7 @@ describe("StatsStore", () => {
     });
 
     it("passes params to API", async () => {
-      let receivedParams: DashboardStatsParams | null = null;
+      let receivedParams: IDashboardStatsParams | null = null;
       const api = createMockStatsApi({
         getDashboardStats: async (params) => {
           receivedParams = params;

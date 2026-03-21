@@ -13,13 +13,13 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { useRootStore } from "@/shared/store/root-store";
-import type { Category } from "@/entities/category/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 import { CategoryType } from "@/entities/category/model/types";
 
-interface CategoryFormModalProps {
+interface ICategoryFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  editCategory: Category | null;
+  editCategory: ICategory | null;
 }
 
 const TYPE_OPTIONS = [
@@ -31,7 +31,7 @@ const CategoryFormModal = observer(function CategoryFormModal({
   isOpen,
   onClose,
   editCategory,
-}: CategoryFormModalProps) {
+}: ICategoryFormModalProps) {
   const { user, workspace, category: categoryStore } = useRootStore();
 
   const [name, setName] = useState("");
@@ -40,6 +40,7 @@ const CategoryFormModal = observer(function CategoryFormModal({
   const [limit, setLimit] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const isEdit = editCategory != null;
 
@@ -57,6 +58,7 @@ const CategoryFormModal = observer(function CategoryFormModal({
       setLimit("");
     }
     setError(null);
+    setNameError(null);
   }, [isOpen, editCategory]);
 
   const currentUser = user.currentUser;
@@ -64,8 +66,9 @@ const CategoryFormModal = observer(function CategoryFormModal({
 
   const handleSubmit = async () => {
     setError(null);
+    setNameError(null);
     if (!name.trim()) {
-      setError("Введите название категории");
+      setNameError("Введите название категории");
       return;
     }
     if (!currentUser || !activeWorkspace) {
@@ -119,7 +122,12 @@ const CategoryFormModal = observer(function CategoryFormModal({
                 label="Название"
                 placeholder="Например: Продукты"
                 value={name}
-                onValueChange={setName}
+                onValueChange={(value) => {
+                  setName(value);
+                  if (nameError) setNameError(null);
+                }}
+                isInvalid={!!nameError}
+                errorMessage={nameError}
                 autoFocus
               />
               <Select

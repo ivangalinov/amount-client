@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useRootStore } from "@/shared/store/root-store";
 import { CategoryFilter as CategoryFilterUI } from "@/shared/ui/CategoryFilter";
 
-export interface CategoryFilterProps {
+export interface ICategoryFilterProps {
   /** Выбранная категория (пустая строка = все категории) */
   selectedCategoryId: string;
   /** Обработчик смены категории */
@@ -24,7 +24,7 @@ export const CategoryFilter = observer(function CategoryFilter({
   label,
   placeholder,
   classNames,
-}: CategoryFilterProps) {
+}: ICategoryFilterProps) {
   const { workspace, category: categoryStore } = useRootStore();
   const activeWorkspace = workspace.activeWorkspace;
 

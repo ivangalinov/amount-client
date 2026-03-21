@@ -9,14 +9,14 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import type { CategoryStatItem } from "@/entities/stats/model/types";
+import type { ICategoryStatItem } from "@/entities/stats/model/types";
 
-export interface CategoryBarChartProps {
-  data: CategoryStatItem[];
+export interface ICategoryBarChartProps {
+  data: ICategoryStatItem[];
   height?: number;
 }
 
-export function CategoryBarChart({ data, height = 280 }: CategoryBarChartProps) {
+export function CategoryBarChart({ data, height = 280 }: ICategoryBarChartProps) {
   const chartData = data.map((item) => ({
     name: item.name,
     value: Math.abs(item.sum),

@@ -1,2 +1,2 @@
 export { CategoryFilter } from "./ui/CategoryFilter";
-export type { CategoryFilterProps } from "./ui/CategoryFilter";
+export type { ICategoryFilterProps } from "./ui/CategoryFilter";

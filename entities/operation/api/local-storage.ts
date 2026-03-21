@@ -1,39 +1,39 @@
 import type {
-  Operation,
+  IOperation,
   OperationId,
 } from "@/entities/operation/model/types";
 import type {
-  OperationApi,
-  OperationCreatePayload,
-  OperationListParams,
-  OperationUpdatePayload,
+  IOperationApi,
+  IOperationCreatePayload,
+  IOperationListParams,
+  IOperationUpdatePayload,
 } from "@/entities/operation/api/types";
 import type { CategoryId } from "@/entities/category/model/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { ListResult } from "@/shared/api/types";
+import type { IListResult } from "@/shared/api/types";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const OPERATIONS_KEY = "amount:operations";
 
-async function readOperations(): Promise<Operation[]> {
+async function readOperations(): Promise<IOperation[]> {
   const raw = await keyValueStorage.getItem(OPERATIONS_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Operation[];
+    return JSON.parse(raw) as IOperation[];
   } catch {
     return [];
   }
 }
 
-async function writeOperations(operations: Operation[]): Promise<void> {
+async function writeOperations(operations: IOperation[]): Promise<void> {
   await keyValueStorage.setItem(OPERATIONS_KEY, JSON.stringify(operations));
 }
 
 function filterOperations(
-  operations: Operation[],
-  params?: OperationListParams,
-): Operation[] {
+  operations: IOperation[],
+  params?: IOperationListParams,
+): IOperation[] {
   if (!params) return operations;
   return operations.filter((o) => {
     if (params.workspaceId != null && o.workspaceId !== params.workspaceId) {
@@ -56,13 +56,13 @@ function filterOperations(
 }
 
 /** Свежие сверху (по createdAt по убыванию) */
-function sortByCreatedDesc(operations: Operation[]): Operation[] {
+function sortByCreatedDesc(operations: IOperation[]): IOperation[] {
   return [...operations].sort(
     (a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0)
   );
 }
 
-function paginate<T>(items: T[], params?: OperationListParams): ListResult<T> {
+function paginate<T>(items: T[], params?: IOperationListParams): IListResult<T> {
   const { limit, offset } = params ?? {};
   if (limit == null && offset == null) {
     return { items, total: items.length };
@@ -75,24 +75,24 @@ function paginate<T>(items: T[], params?: OperationListParams): ListResult<T> {
   };
 }
 
-export const operationLocalStorageApi: OperationApi = {
+export const operationLocalStorageApi: IOperationApi = {
   async listOperations(
-    params?: OperationListParams,
-  ): Promise<ListResult<Operation>> {
+    params?: IOperationListParams,
+  ): Promise<IListResult<IOperation>> {
     const all = await readOperations();
     const filtered = filterOperations(all, params);
     const sorted = sortByCreatedDesc(filtered);
     return paginate(sorted, params);
   },
 
-  async getOperationById(id: OperationId): Promise<Operation | null> {
+  async getOperationById(id: OperationId): Promise<IOperation | null> {
     const operations = await readOperations();
     return operations.find((o) => o.id === id) ?? null;
   },
 
   async createOperation(
-    payload: OperationCreatePayload,
-  ): Promise<Operation> {
+    payload: IOperationCreatePayload,
+  ): Promise<IOperation> {
     const operations = await readOperations();
     const nextId = operations.length
       ? Math.max(...operations.map((o) => o.id)) + 1
@@ -101,7 +101,7 @@ export const operationLocalStorageApi: OperationApi = {
     const createdAt =
       payload.createdAt ?? new Date().toISOString();
 
-    const operation: Operation = {
+    const operation: IOperation = {
       id: nextId,
       amount: payload.amount,
       categoryId: payload.categoryId as CategoryId,
@@ -117,15 +117,15 @@ export const operationLocalStorageApi: OperationApi = {
   },
 
   async updateOperation(
-    payload: OperationUpdatePayload,
-  ): Promise<Operation> {
+    payload: IOperationUpdatePayload,
+  ): Promise<IOperation> {
     const operations = await readOperations();
     const idx = operations.findIndex((o) => o.id === payload.id);
     if (idx === -1) {
       throw new Error("Operation not found");
     }
 
-    const updated: Operation = {
+    const updated: IOperation = {
       ...operations[idx],
       ...payload,
     };

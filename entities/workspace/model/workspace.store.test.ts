@@ -1,19 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type {
-  Workspace,
+  IWorkspace,
   WorkspaceId,
-  WorkspaceUser,
+  IWorkspaceUser,
 } from "@/entities/workspace/model/types";
-import type { WorkspaceApi } from "@/entities/workspace/api/types";
+import type { IWorkspaceApi } from "@/entities/workspace/api/types";
 import { WorkspaceStore } from "@/entities/workspace/model/workspace.store";
 
-function createMockWorkspaceApi(overrides: Partial<{
-  listWorkspaces: WorkspaceApi["listWorkspaces"];
-  getActiveWorkspace: WorkspaceApi["getActiveWorkspace"];
-  createWorkspace: WorkspaceApi["createWorkspace"];
-  setActiveWorkspace: WorkspaceApi["setActiveWorkspace"];
-  getWorkspaceById: WorkspaceApi["getWorkspaceById"];
-}> = {}): WorkspaceApi {
+function createMockWorkspaceApi(
+  overrides: Partial<IWorkspaceApi> = {},
+): IWorkspaceApi {
   return {
     listWorkspaces: async () => ({ items: [], total: 0 }),
     getActiveWorkspace: async () => null,
@@ -47,7 +43,7 @@ describe("WorkspaceStore", () => {
 
   describe("loadWorkspaces", () => {
     it("sets workspaces and activeWorkspace from API", async () => {
-      const workspaces: Workspace[] = [
+      const workspaces: IWorkspace[] = [
         { id: 1, name: "Личный" },
         { id: 2, name: "Семья" },
       ];
@@ -100,7 +96,7 @@ describe("WorkspaceStore", () => {
     });
 
     it("keeps existing activeWorkspace when creating second workspace", async () => {
-      const existing: Workspace = { id: 1, name: "Личный" };
+      const existing: IWorkspace = { id: 1, name: "Личный" };
       const api = createMockWorkspaceApi({
         listWorkspaces: async () => ({ items: [existing], total: 1 }),
         getActiveWorkspace: async () => existing,
@@ -135,7 +131,7 @@ describe("WorkspaceStore", () => {
 
   describe("setActiveWorkspace", () => {
     it("updates activeWorkspace", async () => {
-      const ws: Workspace = { id: 2, name: "Другой" };
+      const ws: IWorkspace = { id: 2, name: "Другой" };
       const api = createMockWorkspaceApi({
         setActiveWorkspace: async () => {},
         getWorkspaceById: async (id: WorkspaceId) => (id === 2 ? ws : null),
@@ -168,7 +164,7 @@ describe("WorkspaceStore", () => {
 
   describe("loadWorkspaceUsers", () => {
     it("sets workspaceUsers from API", async () => {
-      const users: WorkspaceUser[] = [
+      const users: IWorkspaceUser[] = [
         { id: 1, userId: 1, workspaceId: 1 },
         { id: 2, userId: 2, workspaceId: 1 },
       ];
@@ -202,8 +198,8 @@ describe("WorkspaceStore", () => {
 
   describe("addUserToWorkspace", () => {
     it("appends to workspaceUsers when added to active workspace", async () => {
-      const active: Workspace = { id: 1, name: "Личный" };
-      const wu: WorkspaceUser = { id: 1, userId: 10, workspaceId: 1 };
+      const active: IWorkspace = { id: 1, name: "Личный" };
+      const wu: IWorkspaceUser = { id: 1, userId: 10, workspaceId: 1 };
       const api = createMockWorkspaceApi({
         listWorkspaces: async () => ({ items: [active], total: 1 }),
         getActiveWorkspace: async () => active,
@@ -226,7 +222,7 @@ describe("WorkspaceStore", () => {
     });
 
     it("does not append to workspaceUsers when added to other workspace", async () => {
-      const active: Workspace = { id: 1, name: "Личный" };
+      const active: IWorkspace = { id: 1, name: "Личный" };
       const api = createMockWorkspaceApi({
         listWorkspaces: async () => ({ items: [active], total: 1 }),
         getActiveWorkspace: async () => active,

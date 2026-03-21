@@ -11,7 +11,7 @@ import {
   formatDateRange,
 } from "@/shared/lib/date";
 
-export interface DateRangeFilterProps {
+export interface IDateRangeFilterProps {
   /** Начальная дата периода (YYYY-MM-DD) */
   dateFrom: string;
   /** Конечная дата периода (YYYY-MM-DD) */
@@ -24,7 +24,7 @@ export function DateRangeFilter({
   dateFrom,
   dateTo,
   onPeriodChange,
-}: DateRangeFilterProps) {
+}: IDateRangeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSetCurrentMonth = () => {

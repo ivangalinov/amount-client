@@ -1,9 +1,9 @@
-import type { User, UserId } from "@/entities/user/model/types";
-import type { ListParams, ListResult } from "@/shared/api/types";
+import type { IUser, UserId } from "@/entities/user/model/types";
+import type { IListParams, IListResult } from "@/shared/api/types";
 
-export interface UserApi {
-  getCurrentUser(): Promise<User | null>;
-  updateCurrentUser(payload: { name?: string }): Promise<User>;
-  getUserById(id: UserId): Promise<User | null>;
+export interface IUserApi {
+  getCurrentUser(): Promise<IUser | null>;
+  updateCurrentUser(payload: { name?: string }): Promise<IUser>;
+  getUserById(id: UserId): Promise<IUser | null>;
 }
 

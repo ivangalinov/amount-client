@@ -1,6 +1,6 @@
 export { CategoryStatsCard } from "./CategoryStatsCard";
 export type {
-  CategoryStatsCardProps,
+  ICategoryStatsCardProps,
   CategoryStatsVariant,
   CategoryStatsChartMode,
 } from "./CategoryStatsCard";

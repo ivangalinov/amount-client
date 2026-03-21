@@ -1,25 +1,25 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type {
-  Operation,
+  IOperation,
   OperationId,
 } from "@/entities/operation/model/types";
 import type {
-  OperationApi,
-  OperationCreatePayload,
-  OperationListParams,
-  OperationUpdatePayload,
+  IOperationApi,
+  IOperationCreatePayload,
+  IOperationListParams,
+  IOperationUpdatePayload,
 } from "@/entities/operation/api/types";
 import { operationLocalStorageApi } from "@/entities/operation/api/local-storage";
-import type { ListResult } from "@/shared/api/types";
+import type { IListResult } from "@/shared/api/types";
 
 export class OperationStore {
-  private api: OperationApi;
+  private api: IOperationApi;
 
-  operations: Operation[] = [];
+  operations: IOperation[] = [];
   loading = false;
   error: string | null = null;
 
-  constructor(api: OperationApi = operationLocalStorageApi) {
+  constructor(api: IOperationApi = operationLocalStorageApi) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }
@@ -40,11 +40,11 @@ export class OperationStore {
     return this.operations.reduce((sum, o) => sum + o.amount, 0);
   }
 
-  async loadOperations(params?: OperationListParams): Promise<void> {
+  async loadOperations(params?: IOperationListParams): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
-      const result: ListResult<Operation> =
+      const result: IListResult<IOperation> =
         await this.api.listOperations(params);
       runInAction(() => {
         this.operations = result.items;
@@ -62,8 +62,8 @@ export class OperationStore {
   }
 
   async createOperation(
-    payload: OperationCreatePayload,
-  ): Promise<Operation> {
+    payload: IOperationCreatePayload,
+  ): Promise<IOperation> {
     this.loading = true;
     this.error = null;
     try {
@@ -86,8 +86,8 @@ export class OperationStore {
   }
 
   async updateOperation(
-    payload: OperationUpdatePayload,
-  ): Promise<Operation> {
+    payload: IOperationUpdatePayload,
+  ): Promise<IOperation> {
     this.loading = true;
     this.error = null;
     try {

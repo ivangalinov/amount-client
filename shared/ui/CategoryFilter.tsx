@@ -1,11 +1,11 @@
 "use client";
 
 import { Select, SelectItem } from "@heroui/select";
-import type { Category } from "@/entities/category/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 
-export interface CategoryFilterProps {
+export interface ICategoryFilterProps {
   /** Список категорий для выбора */
-  categories: Category[];
+  categories: ICategory[];
   /** Выбранная категория (пустая строка = все категории) */
   selectedCategoryId: string;
   /** Обработчик смены категории */
@@ -25,7 +25,7 @@ export function CategoryFilter({
   label = "Категория",
   placeholder = "Все категории",
   classNames,
-}: CategoryFilterProps) {
+}: ICategoryFilterProps) {
   return (
     <Select
       label={label}

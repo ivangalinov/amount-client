@@ -18,7 +18,7 @@ import { statsStore, StatsStore } from "@/entities/stats/model/stats.store";
 
 enableStaticRendering(!isBrowser);
 
-export interface RootStore {
+export interface IRootStore {
   user: UserStore;
   workspace: WorkspaceStore;
   category: CategoryStore;
@@ -26,7 +26,7 @@ export interface RootStore {
   stats: StatsStore;
 }
 
-const rootStore: RootStore = {
+const rootStore: IRootStore = {
   user: userStore,
   workspace: workspaceStore,
   category: categoryStore,
@@ -34,7 +34,7 @@ const rootStore: RootStore = {
   stats: statsStore,
 };
 
-const RootStoreContext = createContext<RootStore | null>(null);
+const RootStoreContext = createContext<IRootStore | null>(null);
 
 export function RootStoreProvider({
   children,
@@ -48,7 +48,7 @@ export function RootStoreProvider({
   );
 }
 
-export function useRootStore(): RootStore {
+export function useRootStore(): IRootStore {
   const ctx = useContext(RootStoreContext);
   if (!ctx) {
     throw new Error("useRootStore must be used within RootStoreProvider");

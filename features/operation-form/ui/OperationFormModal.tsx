@@ -13,20 +13,20 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { useRootStore } from "@/shared/store/root-store";
-import type { Operation } from "@/entities/operation/model/types";
-import type { Category } from "@/entities/category/model/types";
+import type { IOperation } from "@/entities/operation/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 
-interface OperationFormModalProps {
+interface IOperationFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  editOperation: Operation | null;
+  editOperation: IOperation | null;
 }
 
 const OperationFormModal = observer(function OperationFormModal({
   isOpen,
   onClose,
   editOperation,
-}: OperationFormModalProps) {
+}: IOperationFormModalProps) {
   const { user, workspace, category: categoryStore, operation: operationStore } =
     useRootStore();
 
@@ -43,7 +43,7 @@ const OperationFormModal = observer(function OperationFormModal({
   const [categoryError, setCategoryError] = useState<string | null>(null);
 
   const isEdit = editOperation != null;
-  const categories: Category[] = categoryStore.categories;
+  const categories: ICategory[] = categoryStore.categories;
 
   useEffect(() => {
     if (!isOpen) return;

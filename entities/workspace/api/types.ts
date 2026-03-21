@@ -1,22 +1,22 @@
 import type {
-  Workspace,
+  IWorkspace,
   WorkspaceId,
-  WorkspaceUser,
+  IWorkspaceUser,
 } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { ListParams, ListResult } from "@/shared/api/types";
+import type { IListParams, IListResult } from "@/shared/api/types";
 
-export interface WorkspaceApi {
-  listWorkspaces(params?: ListParams): Promise<ListResult<Workspace>>;
-  createWorkspace(payload: { name: string }): Promise<Workspace>;
-  getWorkspaceById(id: WorkspaceId): Promise<Workspace | null>;
-  getActiveWorkspace(): Promise<Workspace | null>;
+export interface IWorkspaceApi {
+  listWorkspaces(params?: IListParams): Promise<IListResult<IWorkspace>>;
+  createWorkspace(payload: { name: string }): Promise<IWorkspace>;
+  getWorkspaceById(id: WorkspaceId): Promise<IWorkspace | null>;
+  getActiveWorkspace(): Promise<IWorkspace | null>;
   setActiveWorkspace(workspaceId: WorkspaceId): Promise<void>;
-  listWorkspaceUsers(workspaceId: WorkspaceId): Promise<WorkspaceUser[]>;
+  listWorkspaceUsers(workspaceId: WorkspaceId): Promise<IWorkspaceUser[]>;
   addUserToWorkspace(payload: {
     workspaceId: WorkspaceId;
     userId: UserId;
-  }): Promise<WorkspaceUser>;
+  }): Promise<IWorkspaceUser>;
   removeUserFromWorkspace(id: number): Promise<void>;
 }
 

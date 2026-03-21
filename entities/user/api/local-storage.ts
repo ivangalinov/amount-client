@@ -1,6 +1,6 @@
-import type { User } from "@/entities/user/model/types";
+import type { IUser } from "@/entities/user/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { UserApi } from "@/entities/user/api/types";
+import type { IUserApi } from "@/entities/user/api/types";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const CURRENT_USER_KEY = "amount:currentUser";
@@ -8,32 +8,32 @@ const USERS_KEY = "amount:users";
 
 const DEFAULT_USER_NAME = "Локальный пользователь";
 
-async function readUsers(): Promise<User[]> {
+async function readUsers(): Promise<IUser[]> {
   const raw = await keyValueStorage.getItem(USERS_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as User[];
+    return JSON.parse(raw) as IUser[];
   } catch {
     return [];
   }
 }
 
-async function writeUsers(users: User[]): Promise<void> {
+async function writeUsers(users: IUser[]): Promise<void> {
   await keyValueStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-async function ensureDefaultUser(): Promise<User> {
+async function ensureDefaultUser(): Promise<IUser> {
   const users = await readUsers();
   const nextId = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-  const defaultUser: User = { id: nextId, name: DEFAULT_USER_NAME };
+  const defaultUser: IUser = { id: nextId, name: DEFAULT_USER_NAME };
   users.push(defaultUser);
   await writeUsers(users);
   await keyValueStorage.setItem(CURRENT_USER_KEY, String(defaultUser.id));
   return defaultUser;
 }
 
-export const userLocalStorageApi: UserApi = {
-  async getCurrentUser(): Promise<User | null> {
+export const userLocalStorageApi: IUserApi = {
+  async getCurrentUser(): Promise<IUser | null> {
     const idRaw = await keyValueStorage.getItem(CURRENT_USER_KEY);
     const users = await readUsers();
     if (!idRaw) {
@@ -46,7 +46,7 @@ export const userLocalStorageApi: UserApi = {
     return found;
   },
 
-  async updateCurrentUser(payload: { name?: string }): Promise<User> {
+  async updateCurrentUser(payload: { name?: string }): Promise<IUser> {
     const users = await readUsers();
     let current = await this.getCurrentUser();
 
@@ -70,7 +70,7 @@ export const userLocalStorageApi: UserApi = {
     return current;
   },
 
-  async getUserById(id: UserId): Promise<User | null> {
+  async getUserById(id: UserId): Promise<IUser | null> {
     const users = await readUsers();
     return users.find((u) => u.id === id) ?? null;
   },

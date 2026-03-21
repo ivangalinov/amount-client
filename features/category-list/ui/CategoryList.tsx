@@ -15,7 +15,7 @@ import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { useRootStore } from "@/shared/store/root-store";
 import { CategoryFormModal } from "@/features/category-form";
-import type { Category } from "@/entities/category/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 import { CategoryType } from "@/entities/category/model/types";
 
 const typeLabel = (type: CategoryType) =>
@@ -25,7 +25,7 @@ export const CategoryList = observer(function CategoryList() {
   const { user, workspace, category: categoryStore } = useRootStore();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
 
   useEffect(() => {
     void user.loadCurrentUser();
@@ -44,7 +44,7 @@ export const CategoryList = observer(function CategoryList() {
     setModalOpen(true);
   };
 
-  const openEdit = (cat: Category) => {
+  const openEdit = (cat: ICategory) => {
     setEditingCategory(cat);
     setModalOpen(true);
   };
@@ -54,7 +54,7 @@ export const CategoryList = observer(function CategoryList() {
     setEditingCategory(null);
   };
 
-  const handleDelete = async (cat: Category) => {
+  const handleDelete = async (cat: ICategory) => {
     if (!window.confirm(`Удалить категорию «${cat.name}»?`)) return;
     await categoryStore.deleteCategory(cat.id);
   };

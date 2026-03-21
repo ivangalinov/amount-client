@@ -1,25 +1,25 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type {
-  Workspace,
+  IWorkspace,
   WorkspaceId,
-  WorkspaceUser,
+  IWorkspaceUser,
 } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { WorkspaceApi } from "@/entities/workspace/api/types";
+import type { IWorkspaceApi } from "@/entities/workspace/api/types";
 import { workspaceLocalStorageApi } from "@/entities/workspace/api/local-storage";
-import type { ListResult } from "@/shared/api/types";
+import type { IListResult } from "@/shared/api/types";
 
 export class WorkspaceStore {
-  private api: WorkspaceApi;
+  private api: IWorkspaceApi;
 
-  workspaces: Workspace[] = [];
-  activeWorkspace: Workspace | null = null;
-  workspaceUsers: WorkspaceUser[] = [];
+  workspaces: IWorkspace[] = [];
+  activeWorkspace: IWorkspace | null = null;
+  workspaceUsers: IWorkspaceUser[] = [];
 
   loading = false;
   error: string | null = null;
 
-  constructor(api: WorkspaceApi = workspaceLocalStorageApi) {
+  constructor(api: IWorkspaceApi = workspaceLocalStorageApi) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }
@@ -32,7 +32,7 @@ export class WorkspaceStore {
     this.loading = true;
     this.error = null;
     try {
-      const result: ListResult<Workspace> = await this.api.listWorkspaces();
+      const result: IListResult<IWorkspace> = await this.api.listWorkspaces();
       const active = await this.api.getActiveWorkspace();
       runInAction(() => {
         this.workspaces = result.items;
@@ -50,7 +50,7 @@ export class WorkspaceStore {
     }
   }
 
-  async createWorkspace(name: string): Promise<Workspace> {
+  async createWorkspace(name: string): Promise<IWorkspace> {
     this.loading = true;
     this.error = null;
     try {
@@ -119,7 +119,7 @@ export class WorkspaceStore {
   async addUserToWorkspace(payload: {
     workspaceId: WorkspaceId;
     userId: UserId;
-  }): Promise<WorkspaceUser> {
+  }): Promise<IWorkspaceUser> {
     const wu = await this.api.addUserToWorkspace(payload);
     runInAction(() => {
       if (wu.workspaceId === this.activeWorkspace?.id) {

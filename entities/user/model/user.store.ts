@@ -1,18 +1,18 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import type { User, UserId } from "@/entities/user/model/types";
-import type { UserApi } from "@/entities/user/api/types";
+import type { IUser, UserId } from "@/entities/user/model/types";
+import type { IUserApi } from "@/entities/user/api/types";
 import { userLocalStorageApi } from "@/entities/user/api/local-storage";
 
 export class UserStore {
-  private api: UserApi;
+  private api: IUserApi;
 
-  currentUser: User | null = null;
+  currentUser: IUser | null = null;
   /** Cache of users loaded by id (e.g. for operation author names) */
-  usersById = new Map<UserId, User>();
+  usersById = new Map<UserId, IUser>();
   loading = false;
   error: string | null = null;
 
-  constructor(api: UserApi = userLocalStorageApi) {
+  constructor(api: IUserApi = userLocalStorageApi) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }

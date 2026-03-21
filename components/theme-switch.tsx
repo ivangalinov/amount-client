@@ -6,12 +6,12 @@ import clsx from "clsx";
 
 import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
 
-export interface ThemeSwitchProps {
+export interface IThemeSwitchProps {
   className?: string;
   classNames?: SwitchProps["classNames"];
 }
 
-export const ThemeSwitch: FC<ThemeSwitchProps> = ({
+export const ThemeSwitch: FC<IThemeSwitchProps> = ({
   className,
   classNames,
 }) => {

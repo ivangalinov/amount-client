@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { User, UserId } from "@/entities/user/model/types";
-import type { UserApi } from "@/entities/user/api/types";
+import type { IUser, UserId } from "@/entities/user/model/types";
+import type { IUserApi } from "@/entities/user/api/types";
 import { UserStore } from "@/entities/user/model/user.store";
 
 function createMockUserApi(overrides: Partial<{
-  getCurrentUser: UserApi["getCurrentUser"];
-  updateCurrentUser: UserApi["updateCurrentUser"];
-  getUserById: UserApi["getUserById"];
-}> = {}): UserApi {
+  getCurrentUser: IUserApi["getCurrentUser"];
+  updateCurrentUser: IUserApi["updateCurrentUser"];
+  getUserById: IUserApi["getUserById"];
+}> = {}): IUserApi {
   return {
     getCurrentUser: async () => null,
     updateCurrentUser: async (payload) => ({
@@ -38,7 +38,7 @@ describe("UserStore", () => {
 
   describe("loadCurrentUser", () => {
     it("sets currentUser when API returns user", async () => {
-      const user: User = { id: 1, name: "Alice" };
+      const user: IUser = { id: 1, name: "Alice" };
       const api = createMockUserApi({ getCurrentUser: async () => user });
       store = new UserStore(api);
 
@@ -108,7 +108,7 @@ describe("UserStore", () => {
 
   describe("getAuthorName and loadUserById", () => {
     it("returns currentUser name when id matches", async () => {
-      const user: User = { id: 1, name: "Alice" };
+      const user: IUser = { id: 1, name: "Alice" };
       const api = createMockUserApi({ getCurrentUser: async () => user });
       store = new UserStore(api);
       await store.loadCurrentUser();
@@ -117,7 +117,7 @@ describe("UserStore", () => {
     });
 
     it("returns name from usersById after loadUserById", async () => {
-      const user: User = { id: 2, name: "Bob" };
+      const user: IUser = { id: 2, name: "Bob" };
       const api = createMockUserApi({
         getUserById: async (id: UserId) => (id === 2 ? user : null),
       });

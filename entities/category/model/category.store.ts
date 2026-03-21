@@ -1,39 +1,40 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type {
-  Category,
+  ICategory,
   CategoryId,
   CategoryType,
 } from "@/entities/category/model/types";
 import type {
-  CategoryApi,
-  CategoryCreatePayload,
-  CategoryListParams,
-  CategoryUpdatePayload,
+  ICategoryApi,
+  ICategoryCreatePayload,
+  ICategoryListParams,
+  ICategoryUpdatePayload,
 } from "@/entities/category/api/types";
 import { categoryLocalStorageApi } from "@/entities/category/api/local-storage";
-import type { ListResult } from "@/shared/api/types";
+import CategoryAPI from '@/entities/category/api/remote';
+import type { IListResult } from "@/shared/api/types";
 
 export class CategoryStore {
-  private api: CategoryApi;
+  private api: ICategoryApi;
 
-  categories: Category[] = [];
+  categories: ICategory[] = [];
   loading = false;
   error: string | null = null;
 
-  constructor(api: CategoryApi = categoryLocalStorageApi) {
+  constructor(api: ICategoryApi = new CategoryAPI()) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  get categoriesById(): Map<CategoryId, Category> {
+  get categoriesById(): Map<CategoryId, ICategory> {
     return new Map(this.categories.map((c) => [c.id, c]));
   }
 
-  async loadCategories(params?: CategoryListParams): Promise<void> {
+  async loadCategories(params?: ICategoryListParams): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
-      const result: ListResult<Category> = await this.api.listCategories(
+      const result: IListResult<ICategory> = await this.api.listCategories(
         params,
       );
       runInAction(() => {
@@ -51,7 +52,7 @@ export class CategoryStore {
     }
   }
 
-  async createCategory(payload: CategoryCreatePayload): Promise<Category> {
+  async createCategory(payload: ICategoryCreatePayload): Promise<ICategory> {
     this.loading = true;
     this.error = null;
     try {
@@ -73,7 +74,7 @@ export class CategoryStore {
     }
   }
 
-  async updateCategory(payload: CategoryUpdatePayload): Promise<Category> {
+  async updateCategory(payload: ICategoryUpdatePayload): Promise<ICategory> {
     this.loading = true;
     this.error = null;
     try {
@@ -119,7 +120,7 @@ export class CategoryStore {
     }
   }
 
-  getCategoriesByType(type: CategoryType): Category[] {
+  getCategoriesByType(type: CategoryType): ICategory[] {
     return this.categories.filter((c) => c.type === type);
   }
 }

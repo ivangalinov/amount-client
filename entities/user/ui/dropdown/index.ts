@@ -1,2 +1,2 @@
 export { AuthorDropdown } from "./AuthorDropdown";
-export type { AuthorDropdownProps } from "./AuthorDropdown";
+export type { IAuthorDropdownProps } from "./AuthorDropdown";

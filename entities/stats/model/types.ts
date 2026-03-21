@@ -1,28 +1,28 @@
 import type { CategoryId } from "@/entities/category/model/types";
 
-export interface CategoryStatItem {
+export interface ICategoryStatItem {
   categoryId: CategoryId;
   name: string;
   color: string;
   sum: number;
 }
 
-export interface DayStatItem {
+export interface IDayStatItem {
   day: string;
   sum: number;
 }
 
-export interface MonthStatItem {
+export interface IMonthStatItem {
   month: string;
   sum: number;
 }
 
-export interface DashboardStats {
+export interface IDashboardStats {
   balance: number;
   totalIncome: number;
   totalExpense: number;
-  expensesByCategory: CategoryStatItem[];
-  incomeByCategory: CategoryStatItem[];
-  expensesByDay: DayStatItem[];
-  expensesByMonth: MonthStatItem[];
+  expensesByCategory: ICategoryStatItem[];
+  incomeByCategory: ICategoryStatItem[];
+  expensesByDay: IDayStatItem[];
+  expensesByMonth: IMonthStatItem[];
 }

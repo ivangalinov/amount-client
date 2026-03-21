@@ -1,13 +1,13 @@
 import type {
-  Operation,
+  IOperation,
   OperationId,
 } from "@/entities/operation/model/types";
 import type { CategoryId } from "@/entities/category/model/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
-import type { ListParams, ListResult } from "@/shared/api/types";
+import type { IListParams, IListResult } from "@/shared/api/types";
 
-export interface OperationListParams extends ListParams {
+export interface IOperationListParams extends IListParams {
   workspaceId?: WorkspaceId;
   userId?: UserId;
   categoryId?: CategoryId;
@@ -15,7 +15,7 @@ export interface OperationListParams extends ListParams {
   dateTo?: string;
 }
 
-export interface OperationCreatePayload {
+export interface IOperationCreatePayload {
   amount: number;
   categoryId: CategoryId;
   title: string;
@@ -24,7 +24,7 @@ export interface OperationCreatePayload {
   createdAt?: string;
 }
 
-export interface OperationUpdatePayload {
+export interface IOperationUpdatePayload {
   id: OperationId;
   amount?: number;
   categoryId?: CategoryId;
@@ -32,11 +32,11 @@ export interface OperationUpdatePayload {
   createdAt?: string;
 }
 
-export interface OperationApi {
-  listOperations(params?: OperationListParams): Promise<ListResult<Operation>>;
-  getOperationById(id: OperationId): Promise<Operation | null>;
-  createOperation(payload: OperationCreatePayload): Promise<Operation>;
-  updateOperation(payload: OperationUpdatePayload): Promise<Operation>;
+export interface IOperationApi {
+  listOperations(params?: IOperationListParams): Promise<IListResult<IOperation>>;
+  getOperationById(id: OperationId): Promise<IOperation | null>;
+  createOperation(payload: IOperationCreatePayload): Promise<IOperation>;
+  updateOperation(payload: IOperationUpdatePayload): Promise<IOperation>;
   deleteOperation(id: OperationId): Promise<void>;
 }
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { Select, SelectItem } from "@heroui/select";
-import type { User, UserId } from "@/entities/user/model/types";
+import type { IUser, UserId } from "@/entities/user/model/types";
 
-export interface AuthorDropdownProps {
+export interface IAuthorDropdownProps {
   /** Список пользователей (авторов) для выбора */
-  users: User[];
+  users: IUser[];
   /** Выбранный автор (пустая строка = все авторы) */
   selectedUserId: UserId | "";
   /** Обработчик смены автора */
@@ -25,7 +25,7 @@ export function AuthorDropdown({
   label = "Автор",
   placeholder = "Все авторы",
   classNames,
-}: AuthorDropdownProps) {
+}: IAuthorDropdownProps) {
   return (
     <Select
       label={label}

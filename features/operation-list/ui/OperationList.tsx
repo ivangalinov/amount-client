@@ -17,7 +17,7 @@ import { useRootStore } from "@/shared/store/root-store";
 import { OperationFormModal } from "@/features/operation-form";
 import { DateRangeFilter } from "@/shared/ui/DateRangeFilter";
 import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
-import type { Operation } from "@/entities/operation/model/types";
+import type { IOperation } from "@/entities/operation/model/types";
 import { AuthorDropdown } from "@/features/author-dropdown";
 import { CategoryFilter } from "@/features/category-filter";
 
@@ -29,7 +29,7 @@ export const OperationList = observer(function OperationList() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [authorId, setAuthorId] = useState<number | "">("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingOperation, setEditingOperation] = useState<Operation | null>(
+  const [editingOperation, setEditingOperation] = useState<IOperation | null>(
     null
   );
 
@@ -74,7 +74,7 @@ export const OperationList = observer(function OperationList() {
     setModalOpen(true);
   };
 
-  const openEdit = (op: Operation) => {
+  const openEdit = (op: IOperation) => {
     setEditingOperation(op);
     setModalOpen(true);
   };
@@ -84,7 +84,7 @@ export const OperationList = observer(function OperationList() {
     setEditingOperation(null);
   };
 
-  const handleDelete = async (op: Operation) => {
+  const handleDelete = async (op: IOperation) => {
     if (!window.confirm(`Удалить операцию «${op.title}»?`)) return;
     await operation.deleteOperation(op.id);
   };

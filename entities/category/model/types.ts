@@ -6,9 +6,10 @@ export type CategoryId = number;
 export enum CategoryType {
   Expense = "expense",
   Income = "income",
+  Transfer = "transfer",
 }
 
-export interface Category {
+export interface ICategory {
   id: CategoryId;
   name: string;
   workspaceId: WorkspaceId;

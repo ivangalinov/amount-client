@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { Operation } from "@/entities/operation/model/types";
-import type { OperationApi, OperationCreatePayload } from "@/entities/operation/api/types";
+import type { IOperation } from "@/entities/operation/model/types";
+import type { IOperationApi, IOperationCreatePayload } from "@/entities/operation/api/types";
 import { OperationStore } from "@/entities/operation/model/operation.store";
 
 function createMockOperationApi(overrides: Partial<{
-  listOperations: OperationApi["listOperations"];
-  createOperation: OperationApi["createOperation"];
-  updateOperation: OperationApi["updateOperation"];
-  deleteOperation: OperationApi["deleteOperation"];
-}> = {}): OperationApi {
+  listOperations: IOperationApi["listOperations"];
+  createOperation: IOperationApi["createOperation"];
+  updateOperation: IOperationApi["updateOperation"];
+  deleteOperation: IOperationApi["deleteOperation"];
+}> = {}): IOperationApi {
   return {
     listOperations: async () => ({ items: [], total: 0 }),
     getOperationById: async () => null,
@@ -53,7 +53,7 @@ describe("OperationStore", () => {
 
   describe("loadOperations", () => {
     it("sets operations from API", async () => {
-      const ops: Operation[] = [
+      const ops: IOperation[] = [
         {
           id: 1,
           amount: -100,
@@ -95,7 +95,7 @@ describe("OperationStore", () => {
 
   describe("balance, totalIncome, totalExpense", () => {
     it("computes correctly with mixed operations", async () => {
-      const ops: Operation[] = [
+      const ops: IOperation[] = [
         {
           id: 1,
           amount: 1000,
@@ -161,7 +161,7 @@ describe("OperationStore", () => {
     });
 
     it("appends operation and returns it", async () => {
-      const payload: OperationCreatePayload = {
+      const payload: IOperationCreatePayload = {
         amount: -50,
         categoryId: 1,
         title: "Кофе",
@@ -192,7 +192,7 @@ describe("OperationStore", () => {
 
   describe("updateOperation", () => {
     it("updates existing operation in list", async () => {
-      const ops: Operation[] = [
+      const ops: IOperation[] = [
         {
           id: 1,
           amount: -100,
@@ -228,7 +228,7 @@ describe("OperationStore", () => {
 
   describe("deleteOperation", () => {
     it("removes operation from list", async () => {
-      const ops: Operation[] = [
+      const ops: IOperation[] = [
         {
           id: 1,
           amount: -100,
@@ -253,7 +253,7 @@ describe("OperationStore", () => {
     });
 
     it("sets error and rethrows when API throws, operations unchanged", async () => {
-      const ops: Operation[] = [
+      const ops: IOperation[] = [
         {
           id: 1,
           amount: -100,
