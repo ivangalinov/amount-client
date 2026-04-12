@@ -7,6 +7,9 @@ import { userLocalStorageApi } from "@/entities/user/api/local-storage";
 export class UserStore {
   private readonly injectedApi: IUserApi | null;
 
+  /** Сливает параллельные вызовы `loadCurrentUser` (Strict Mode, несколько эффектов). */
+  private sessionLoadPromise: Promise<void> | null = null;
+
   currentUser: IUser | null = null;
   /** Cache of users loaded by id (e.g. for operation author names) */
   usersById = new Map<UserId, IUser>();
@@ -51,23 +54,37 @@ export class UserStore {
   }
 
   async loadCurrentUser(): Promise<void> {
-    this.loading = true;
-    this.error = null;
+    if (this.sessionLoadPromise) {
+      return this.sessionLoadPromise;
+    }
+
+    this.sessionLoadPromise = (async () => {
+      runInAction(() => {
+        this.loading = true;
+        this.error = null;
+      });
+      try {
+        const next = await this.resolveApi().getCurrentUser();
+        runInAction(() => {
+          this.currentUser = next;
+        });
+      } catch (e) {
+        runInAction(() => {
+          this.error =
+            e instanceof Error ? e.message : "Failed to load current user";
+        });
+      } finally {
+        runInAction(() => {
+          this.loading = false;
+          this.sessionChecked = true;
+        });
+      }
+    })();
+
     try {
-      const user = await this.resolveApi().getCurrentUser();
-      runInAction(() => {
-        this.currentUser = user;
-      });
-    } catch (e) {
-      runInAction(() => {
-        this.error =
-          e instanceof Error ? e.message : "Failed to load current user";
-      });
+      await this.sessionLoadPromise;
     } finally {
-      runInAction(() => {
-        this.loading = false;
-        this.sessionChecked = true;
-      });
+      this.sessionLoadPromise = null;
     }
   }
 

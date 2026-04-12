@@ -24,7 +24,7 @@ export const AuthGate = observer(function AuthGate({
 
   useEffect(() => {
     void user.loadCurrentUser();
-  }, [user, router.pathname]);
+  }, [router.pathname]);
 
   useEffect(() => {
     if (!user.sessionChecked) return;

@@ -19,15 +19,14 @@ function formatMonth(ym: string): string {
 }
 
 export const Dashboard = observer(function Dashboard() {
-  const { user, workspace, stats } = useRootStore();
+  const { workspace, stats } = useRootStore();
 
   const [dateFrom, setDateFrom] = useState(() => getDefaultDateFrom());
   const [dateTo, setDateTo] = useState(() => getDefaultDateTo());
 
   useEffect(() => {
-    void user.loadCurrentUser();
     void workspace.loadWorkspaces();
-  }, [user, workspace]);
+  }, [workspace]);
 
   const activeWorkspace = workspace.activeWorkspace;
 

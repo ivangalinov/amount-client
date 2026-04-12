@@ -116,7 +116,6 @@ const OperationFormModal = observer(function OperationFormModal({
           amount: numAmount,
           title: title.trim(),
           categoryId: catId,
-          userId: currentUser.id,
           workspaceId: activeWorkspace.id,
           createdAt: dateStr,
         });

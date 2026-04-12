@@ -106,7 +106,7 @@ export const operationLocalStorageApi: IOperationApi = {
       amount: payload.amount,
       categoryId: payload.categoryId as CategoryId,
       title: payload.title,
-      userId: payload.userId as UserId,
+      userId: (payload.userId ?? 1) as UserId,
       workspaceId: payload.workspaceId as WorkspaceId,
       createdAt,
     };

@@ -22,15 +22,14 @@ const typeLabel = (type: CategoryType) =>
   type === CategoryType.Income ? "Доход" : "Расход";
 
 export const CategoryList = observer(function CategoryList() {
-  const { user, workspace, category: categoryStore } = useRootStore();
+  const { workspace, category: categoryStore } = useRootStore();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
 
   useEffect(() => {
-    void user.loadCurrentUser();
     void workspace.loadWorkspaces();
-  }, [user, workspace]);
+  }, [workspace]);
 
   const activeWorkspace = workspace.activeWorkspace;
 

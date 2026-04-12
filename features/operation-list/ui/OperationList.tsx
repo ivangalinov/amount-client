@@ -34,9 +34,8 @@ export const OperationList = observer(function OperationList() {
   );
 
   const loadData = useCallback(() => {
-    void user.loadCurrentUser();
     void workspace.loadWorkspaces();
-  }, [user, workspace]);
+  }, [workspace]);
 
   useEffect(() => {
     loadData();

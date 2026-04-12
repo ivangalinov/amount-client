@@ -17,7 +17,7 @@ function createMockOperationApi(overrides: Partial<{
       amount: payload.amount,
       categoryId: payload.categoryId,
       title: payload.title,
-      userId: payload.userId,
+      userId: payload.userId ?? 1,
       workspaceId: payload.workspaceId,
       createdAt: payload.createdAt ?? new Date().toISOString(),
     }),

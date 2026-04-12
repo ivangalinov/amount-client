@@ -9,19 +9,29 @@ import type {
   IOperationListParams,
   IOperationUpdatePayload,
 } from "@/entities/operation/api/types";
+import OperationRemoteApi from "@/entities/operation/api/remote";
 import { operationLocalStorageApi } from "@/entities/operation/api/local-storage";
 import type { IListResult } from "@/shared/api/types";
 
 export class OperationStore {
-  private api: IOperationApi;
+  private readonly injectedApi: IOperationApi | null;
 
   operations: IOperation[] = [];
   loading = false;
   error: string | null = null;
 
-  constructor(api: IOperationApi = operationLocalStorageApi) {
-    this.api = api;
+  constructor(api?: IOperationApi) {
+    this.injectedApi = api ?? null;
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  private resolveApi(): IOperationApi {
+    if (this.injectedApi) {
+      return this.injectedApi;
+    }
+    return typeof window !== "undefined"
+      ? new OperationRemoteApi()
+      : operationLocalStorageApi;
   }
 
   get totalIncome(): number {
@@ -45,7 +55,7 @@ export class OperationStore {
     this.error = null;
     try {
       const result: IListResult<IOperation> =
-        await this.api.listOperations(params);
+        await this.resolveApi().listOperations(params);
       runInAction(() => {
         this.operations = result.items;
       });
@@ -67,7 +77,7 @@ export class OperationStore {
     this.loading = true;
     this.error = null;
     try {
-      const operation = await this.api.createOperation(payload);
+      const operation = await this.resolveApi().createOperation(payload);
       runInAction(() => {
         this.operations.push(operation);
       });
@@ -91,7 +101,7 @@ export class OperationStore {
     this.loading = true;
     this.error = null;
     try {
-      const updated = await this.api.updateOperation(payload);
+      const updated = await this.resolveApi().updateOperation(payload);
       runInAction(() => {
         const idx = this.operations.findIndex((o) => o.id === updated.id);
         if (idx !== -1) {
@@ -116,7 +126,7 @@ export class OperationStore {
     this.loading = true;
     this.error = null;
     try {
-      await this.api.deleteOperation(id);
+      await this.resolveApi().deleteOperation(id);
       runInAction(() => {
         this.operations = this.operations.filter((o) => o.id !== id);
       });
@@ -135,4 +145,3 @@ export class OperationStore {
 }
 
 export const operationStore = new OperationStore();
-

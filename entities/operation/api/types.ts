@@ -19,7 +19,8 @@ export interface IOperationCreatePayload {
   amount: number;
   categoryId: CategoryId;
   title: string;
-  userId: UserId;
+  /** Для локального API; удалённый бэкенд выставляет автора из сессии. */
+  userId?: UserId;
   workspaceId: WorkspaceId;
   createdAt?: string;
 }
