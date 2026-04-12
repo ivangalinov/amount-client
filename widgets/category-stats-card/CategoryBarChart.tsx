@@ -54,10 +54,12 @@ export function CategoryBarChart({ data, height = 280 }: ICategoryBarChartProps)
           tickLine={false}
         />
         <Tooltip
-          formatter={(value: number, _name: string, props: { payload: { name: string } }) => [
-            (value as number).toFixed(2),
-            props.payload.name,
-          ]}
+          formatter={(value, _name, item) => {
+            const name =
+              (item as { payload?: { name?: string } } | undefined)?.payload
+                ?.name ?? "";
+            return [Number(value).toFixed(2), name];
+          }}
           contentStyle={{
             borderRadius: "8px",
             border: "1px solid var(--nextui-colors-default-200)",

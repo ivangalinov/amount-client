@@ -3,18 +3,33 @@ import type { IUser, UserId } from "@/entities/user/model/types";
 import type { IUserApi } from "@/entities/user/api/types";
 import { UserStore } from "@/entities/user/model/user.store";
 
-function createMockUserApi(overrides: Partial<{
-  getCurrentUser: IUserApi["getCurrentUser"];
-  updateCurrentUser: IUserApi["updateCurrentUser"];
-  getUserById: IUserApi["getUserById"];
-}> = {}): IUserApi {
+const mockUser = (partial: Partial<IUser> & Pick<IUser, "id" | "name">): IUser => ({
+  email: partial.email ?? "u@test.dev",
+  ...partial,
+});
+
+function createMockUserApi(
+  overrides: Partial<{
+    getCurrentUser: IUserApi["getCurrentUser"];
+    updateCurrentUser: IUserApi["updateCurrentUser"];
+    getUserById: IUserApi["getUserById"];
+    login: IUserApi["login"];
+    register: IUserApi["register"];
+    logout: IUserApi["logout"];
+  }> = {},
+): IUserApi {
   return {
     getCurrentUser: async () => null,
-    updateCurrentUser: async (payload) => ({
-      id: 1,
-      name: payload.name ?? "Test",
-    }),
+    updateCurrentUser: async (payload) =>
+      mockUser({
+        id: 1,
+        name: payload.name ?? "Test",
+        email: "test@test.dev",
+      }),
     getUserById: async () => null,
+    login: async () => mockUser({ id: 1, name: "L", email: "l@test.dev" }),
+    register: async () => mockUser({ id: 1, name: "R", email: "r@test.dev" }),
+    logout: async () => {},
     ...overrides,
   };
 }
@@ -30,6 +45,7 @@ describe("UserStore", () => {
     it("has null currentUser and is not authenticated", () => {
       expect(store.currentUser).toBeNull();
       expect(store.isAuthenticated).toBe(false);
+      expect(store.sessionChecked).toBe(false);
     });
     it("getAuthorName returns placeholder for unknown id", () => {
       expect(store.getAuthorName(1)).toBe("—");
@@ -38,7 +54,7 @@ describe("UserStore", () => {
 
   describe("loadCurrentUser", () => {
     it("sets currentUser when API returns user", async () => {
-      const user: IUser = { id: 1, name: "Alice" };
+      const user = mockUser({ id: 1, name: "Alice", email: "a@test.dev" });
       const api = createMockUserApi({ getCurrentUser: async () => user });
       store = new UserStore(api);
 
@@ -48,6 +64,7 @@ describe("UserStore", () => {
       expect(store.isAuthenticated).toBe(true);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
+      expect(store.sessionChecked).toBe(true);
     });
 
     it("keeps currentUser null when API returns null", async () => {
@@ -55,6 +72,7 @@ describe("UserStore", () => {
 
       expect(store.currentUser).toBeNull();
       expect(store.loading).toBe(false);
+      expect(store.sessionChecked).toBe(true);
     });
 
     it("sets error when API throws", async () => {
@@ -70,22 +88,27 @@ describe("UserStore", () => {
       expect(store.currentUser).toBeNull();
       expect(store.error).toBe("Network error");
       expect(store.loading).toBe(false);
+      expect(store.sessionChecked).toBe(true);
     });
   });
 
   describe("updateCurrentUser", () => {
     it("updates currentUser with returned user", async () => {
       const api = createMockUserApi({
-        updateCurrentUser: async (payload) => ({
-          id: 1,
-          name: payload.name ?? "Updated",
-        }),
+        updateCurrentUser: async (payload) =>
+          mockUser({
+            id: 1,
+            name: payload.name ?? "Updated",
+            email: "x@test.dev",
+          }),
       });
       store = new UserStore(api);
 
       await store.updateCurrentUser({ name: "Bob" });
 
-      expect(store.currentUser).toEqual({ id: 1, name: "Bob" });
+      expect(store.currentUser).toEqual(
+        mockUser({ id: 1, name: "Bob", email: "x@test.dev" }),
+      );
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
     });
@@ -108,7 +131,7 @@ describe("UserStore", () => {
 
   describe("getAuthorName and loadUserById", () => {
     it("returns currentUser name when id matches", async () => {
-      const user: IUser = { id: 1, name: "Alice" };
+      const user = mockUser({ id: 1, name: "Alice", email: "a@test.dev" });
       const api = createMockUserApi({ getCurrentUser: async () => user });
       store = new UserStore(api);
       await store.loadCurrentUser();
@@ -117,7 +140,7 @@ describe("UserStore", () => {
     });
 
     it("returns name from usersById after loadUserById", async () => {
-      const user: IUser = { id: 2, name: "Bob" };
+      const user = mockUser({ id: 2, name: "Bob", email: "b@test.dev" });
       const api = createMockUserApi({
         getUserById: async (id: UserId) => (id === 2 ? user : null),
       });
@@ -133,7 +156,7 @@ describe("UserStore", () => {
       const api = createMockUserApi({
         getUserById: async () => {
           callCount++;
-          return { id: 1, name: "Cached" };
+          return mockUser({ id: 1, name: "Cached", email: "c@test.dev" });
         },
       });
       store = new UserStore(api);

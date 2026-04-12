@@ -45,7 +45,9 @@ export const OperationList = observer(function OperationList() {
   const activeWorkspace = workspace.activeWorkspace;
 
   useEffect(() => {
-    const userIds = [...new Set(operation.operations.map((op) => op.userId))];
+    const userIds = Array.from(
+      new Set(operation.operations.map((op) => op.userId)),
+    );
     userIds.forEach((id) => void user.loadUserById(id));
   }, [operation.operations, user]);
 

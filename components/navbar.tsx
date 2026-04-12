@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import {
   Navbar as HeroUINavbar,
@@ -12,6 +11,7 @@ import {
 import { Avatar } from "@heroui/avatar";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
+import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
@@ -21,22 +21,23 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useRootStore } from "@/shared/store/root-store";
-import {
-  GithubIcon,
-  SearchIcon,
-  Logo
-} from "@/components/icons";
+import { GithubIcon, SearchIcon } from "@/components/icons";
 
 export const Navbar = observer(function Navbar() {
   const router = useRouter();
   const pathname = router.pathname;
   const { user } = useRootStore();
 
-  useEffect(() => {
-    void user.loadCurrentUser();
-  }, [user]);
-
   const currentUser = user.currentUser;
+
+  async function handleLogout() {
+    try {
+      await user.logout();
+      await router.push("/login");
+    } catch {
+      /* store keeps error */
+    }
+  }
 
   const searchInput = (
     <Input
@@ -72,6 +73,7 @@ export const Navbar = observer(function Navbar() {
         <div className="hidden lg:flex gap-4 justify-start ml-2">
           {siteConfig.navItems.map((item) => {
             const isActive = pathname === item.href;
+
             return (
               <NavbarItem key={item.href}>
                 <NextLink
@@ -97,14 +99,25 @@ export const Navbar = observer(function Navbar() {
           <ThemeSwitch />
           <div className="flex items-center gap-2">
             <Avatar
-              size="sm"
-              name={currentUser?.name}
               showFallback
               classNames={{ base: "flex-shrink-0" }}
+              name={currentUser?.name}
+              size="sm"
             />
             <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-[180px]">
               {currentUser?.name ?? "Гость"}
             </span>
+            {user.isAuthenticated ? (
+              <Button
+                color="default"
+                isLoading={user.loading}
+                size="sm"
+                variant="flat"
+                onPress={handleLogout}
+              >
+                Выйти
+              </Button>
+            ) : null}
           </div>
         </NavbarItem>
       </NavbarContent>

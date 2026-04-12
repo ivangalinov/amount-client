@@ -10,16 +10,8 @@ import type {
   ICategoryListParams,
   ICategoryUpdatePayload,
 } from "./types";
-
-function getCategoryApiBase(): string {
-  if (process.env.NEXT_PUBLIC_CATEGORY_API_BASE) {
-    return process.env.NEXT_PUBLIC_CATEGORY_API_BASE.replace(/\/$/, "");
-  }
-  if (typeof window !== "undefined") {
-    return "/api/category-proxy";
-  }
-  return process.env.CATEGORY_API_INTERNAL_URL ?? "http://127.0.0.1:8000";
-}
+import { getApiBase } from "@/shared/lib/api-base";
+import { parseFastApiError } from "@/shared/lib/fastapi-error";
 
 type ApiCategoryRow = {
   id?: number;
@@ -59,7 +51,6 @@ function toApiCreateBody(p: ICategoryCreatePayload): Record<string, unknown> {
     color: p.color?.trim() || "#808080",
   };
   if (p.limit != null && p.limit !== "") body.limit = p.limit;
-  if (p.userId != null) body.user_id = p.userId;
   return body;
 }
 
@@ -72,24 +63,6 @@ function toApiUpdateBody(
   if (p.color !== undefined) body.color = p.color;
   if (p.limit !== undefined) body.limit = p.limit === "" ? null : p.limit;
   return Object.keys(body).length ? body : undefined;
-}
-
-function parseFastApiError(text: string): string {
-  try {
-    const j = JSON.parse(text) as { detail?: unknown };
-    if (j.detail == null) return text;
-    if (Array.isArray(j.detail)) {
-      return j.detail
-        .map(
-          (d: { loc?: unknown[]; msg?: string }) =>
-            `${(d.loc ?? []).join(".")}: ${d.msg ?? ""}`,
-        )
-        .join("; ");
-    }
-    return String(j.detail);
-  } catch {
-    return text;
-  }
 }
 
 interface IRequestParams {
@@ -205,10 +178,11 @@ export default class RemoteCategoryApi implements ICategoryApi {
       headers.set("Content-Type", "application/json");
     }
 
-    return fetch(`${getCategoryApiBase()}/${url}`, {
+    return fetch(`${getApiBase()}/${url}`, {
       method,
       body: jsonBody,
       headers,
+      credentials: "include",
     });
   }
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 
 import { fontSans, fontMono } from "@/config/fonts";
 import "@/styles/globals.css";
+import { AuthGate } from "@/components/auth-gate";
 import { RootStoreProvider } from "@/shared/store/root-store";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -15,7 +16,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider attribute="class" defaultTheme="light">
         <RootStoreProvider>
-          <Component {...pageProps} />
+          <AuthGate>
+            <Component {...pageProps} />
+          </AuthGate>
         </RootStoreProvider>
       </NextThemesProvider>
     </HeroUIProvider>
