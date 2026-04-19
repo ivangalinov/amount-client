@@ -8,8 +8,11 @@ export interface IOperation {
   id: OperationId;
   amount: number;
   categoryId: CategoryId;
+  categoryName: string;
+  categoryColor: string;
   title: string;
   userId: UserId;
+  userName: string;
   workspaceId: WorkspaceId;
   createdAt: string;
 }

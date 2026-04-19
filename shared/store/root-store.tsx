@@ -55,4 +55,3 @@ export function useRootStore(): IRootStore {
   }
   return ctx;
 }
-

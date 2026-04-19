@@ -34,22 +34,6 @@ export class OperationStore {
       : operationLocalStorageApi;
   }
 
-  get totalIncome(): number {
-    return this.operations
-      .filter((o) => o.amount > 0)
-      .reduce((sum, o) => sum + o.amount, 0);
-  }
-
-  get totalExpense(): number {
-    return this.operations
-      .filter((o) => o.amount < 0)
-      .reduce((sum, o) => sum + o.amount, 0);
-  }
-
-  get balance(): number {
-    return this.operations.reduce((sum, o) => sum + o.amount, 0);
-  }
-
   async loadOperations(params?: IOperationListParams): Promise<void> {
     this.loading = true;
     this.error = null;
@@ -78,9 +62,15 @@ export class OperationStore {
     this.error = null;
     try {
       const operation = await this.resolveApi().createOperation(payload);
+  
       runInAction(() => {
-        this.operations.push(operation);
+        this.operations = [
+  
+          operation,
+          ...this.operations
+        ]
       });
+
       return operation;
     } catch (e) {
       runInAction(() => {
@@ -102,12 +92,15 @@ export class OperationStore {
     this.error = null;
     try {
       const updated = await this.resolveApi().updateOperation(payload);
+
       runInAction(() => {
         const idx = this.operations.findIndex((o) => o.id === updated.id);
+  
         if (idx !== -1) {
           this.operations[idx] = updated;
         }
       });
+
       return updated;
     } catch (e) {
       runInAction(() => {

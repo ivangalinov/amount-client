@@ -4,10 +4,8 @@ import type {
   WorkspaceId,
   IWorkspaceUser,
 } from "@/entities/workspace/model/types";
-import type { UserId } from "@/entities/user/model/types";
 import type { IWorkspaceApi } from "@/entities/workspace/api/types";
-import { workspaceLocalStorageApi } from "@/entities/workspace/api/local-storage";
-import type { IListResult } from "@/shared/api/types";
+import RemoteAPI from "@/entities/workspace/api/remote";
 
 export class WorkspaceStore {
   private api: IWorkspaceApi;
@@ -19,7 +17,7 @@ export class WorkspaceStore {
   loading = false;
   error: string | null = null;
 
-  constructor(api: IWorkspaceApi = workspaceLocalStorageApi) {
+  constructor(api: IWorkspaceApi = new RemoteAPI()) {
     this.api = api;
     makeAutoObservable(this, {}, { autoBind: true });
   }
@@ -29,65 +27,20 @@ export class WorkspaceStore {
   }
 
   async loadWorkspaces(): Promise<void> {
+    if (this.activeWorkspace) {
+      return;
+    }
     this.loading = true;
     this.error = null;
     try {
-      const result: IListResult<IWorkspace> = await this.api.listWorkspaces();
       const active = await this.api.getActiveWorkspace();
       runInAction(() => {
-        this.workspaces = result.items;
         this.activeWorkspace = active;
       });
     } catch (e) {
       runInAction(() => {
         this.error =
           e instanceof Error ? e.message : "Failed to load workspaces";
-      });
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
-  }
-
-  async createWorkspace(name: string): Promise<IWorkspace> {
-    this.loading = true;
-    this.error = null;
-    try {
-      const workspace = await this.api.createWorkspace({ name });
-      runInAction(() => {
-        this.workspaces.push(workspace);
-        if (!this.activeWorkspace) {
-          this.activeWorkspace = workspace;
-        }
-      });
-      return workspace;
-    } catch (e) {
-      runInAction(() => {
-        this.error =
-          e instanceof Error ? e.message : "Failed to create workspace";
-      });
-      throw e;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
-  }
-
-  async setActiveWorkspace(id: WorkspaceId): Promise<void> {
-    this.loading = true;
-    this.error = null;
-    try {
-      await this.api.setActiveWorkspace(id);
-      const workspace = await this.api.getWorkspaceById(id);
-      runInAction(() => {
-        this.activeWorkspace = workspace;
-      });
-    } catch (e) {
-      runInAction(() => {
-        this.error =
-          e instanceof Error ? e.message : "Failed to set active workspace";
       });
     } finally {
       runInAction(() => {
@@ -114,19 +67,6 @@ export class WorkspaceStore {
         this.loading = false;
       });
     }
-  }
-
-  async addUserToWorkspace(payload: {
-    workspaceId: WorkspaceId;
-    userId: UserId;
-  }): Promise<IWorkspaceUser> {
-    const wu = await this.api.addUserToWorkspace(payload);
-    runInAction(() => {
-      if (wu.workspaceId === this.activeWorkspace?.id) {
-        this.workspaceUsers.push(wu);
-      }
-    });
-    return wu;
   }
 }
 

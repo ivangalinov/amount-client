@@ -19,8 +19,11 @@ type ApiOperationRow = {
   id?: number;
   amount?: number;
   category_id?: number;
+  category_name?: string;
+  category_color?: string;
   title?: string;
   user_id?: number;
+  user_name?: string;
   workspace_id?: number;
   created?: string;
 };
@@ -30,8 +33,11 @@ function mapOperation(row: ApiOperationRow): IOperation {
     id: row.id as OperationId,
     amount: Number(row.amount ?? 0),
     categoryId: (row.category_id ?? 0) as CategoryId,
+    categoryName: row.category_name as string,
+    categoryColor: row.category_color as string,
     title: String(row.title ?? ""),
     userId: (row.user_id ?? 0) as UserId,
+    userName: row.user_name as string,
     workspaceId: (row.workspace_id ?? 0) as WorkspaceId,
     createdAt: String(row.created ?? new Date().toISOString()),
   };

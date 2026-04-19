@@ -22,7 +22,7 @@ import { AuthorDropdown } from "@/features/author-dropdown";
 import { CategoryFilter } from "@/features/category-filter";
 
 export const OperationList = observer(function OperationList() {
-  const { user, workspace, category: categoryStore, operation } = useRootStore();
+  const { workspace, operation } = useRootStore();
 
   const [dateFrom, setDateFrom] = useState(() => getDefaultDateFrom());
   const [dateTo, setDateTo] = useState(() => getDefaultDateTo());
@@ -38,17 +38,11 @@ export const OperationList = observer(function OperationList() {
   }, [workspace]);
 
   useEffect(() => {
+    console.info('loadData')
     loadData();
-  }, [loadData]);
+  }, []);
 
   const activeWorkspace = workspace.activeWorkspace;
-
-  useEffect(() => {
-    const userIds = Array.from(
-      new Set(operation.operations.map((op) => op.userId)),
-    );
-    userIds.forEach((id) => void user.loadUserById(id));
-  }, [operation.operations, user]);
 
   useEffect(() => {
     if (!activeWorkspace) return;
@@ -146,7 +140,6 @@ export const OperationList = observer(function OperationList() {
             </TableHeader>
             <TableBody emptyContent="Операций пока нет">
               {operation.operations.map((op) => {
-                const cat = categoryStore.categoriesById.get(op.categoryId);
                 return (
                   <TableRow key={op.id}>
                     <TableCell>
@@ -156,22 +149,22 @@ export const OperationList = observer(function OperationList() {
                     <TableCell>
                       <span
                         className="inline-flex items-center gap-1.5"
-                        style={{ color: cat?.color }}
+                        style={{ color: op.categoryColor }}
                       >
-                        {cat ? (
+                        {op.categoryId ? (
                           <>
                             <span
                               className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: cat.color }}
+                              style={{ backgroundColor: op.categoryColor }}
                             />
-                            {cat.name}
+                            {op.categoryName}
                           </>
                         ) : (
                           "—"
                         )}
                       </span>
                     </TableCell>
-                    <TableCell>{user.getAuthorName(op.userId)}</TableCell>
+                    <TableCell>{op.userName}</TableCell>
                     <TableCell
                       className={
                         op.amount < 0 ? "text-danger" : "text-success"
