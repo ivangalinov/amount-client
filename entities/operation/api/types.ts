@@ -2,7 +2,7 @@ import type {
   IOperation,
   OperationId,
 } from "@/entities/operation/model/types";
-import type { CategoryId } from "@/entities/category/model/types";
+import type { CategoryId, CategoryType } from "@/entities/category/model/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
 import type { IListParams, IListResult } from "@/shared/api/types";
@@ -13,6 +13,7 @@ export interface IOperationListParams extends IListParams {
   categoryId?: CategoryId;
   dateFrom?: string;
   dateTo?: string;
+  type?: CategoryType;
 }
 
 export interface IOperationCreatePayload {

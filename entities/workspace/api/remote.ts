@@ -19,7 +19,7 @@ export default class WorkspaceRemoteAPI implements IWorkspaceApi {
         throw new Error('Method not implemented.');
     }
     async getActiveWorkspace(): Promise<IWorkspace | null> {
-        const response = await this._httpClient.fetch('/workspace/active');
+        const response = await this._httpClient.fetch('workspace/active');
     
         return response.json();
     }
@@ -30,7 +30,7 @@ export default class WorkspaceRemoteAPI implements IWorkspaceApi {
         const searchParams = new URLSearchParams({
             workspace_id: workspaceId.toString()
         });
-        const response = await this._httpClient.fetch('/workspace/users', {}, searchParams);
+        const response = await this._httpClient.fetch('workspace/users', {}, searchParams);
         const json = await response.json();
 
         return json.items.map((user: { id: number, name: string }) => ({

@@ -103,33 +103,33 @@ export default defineConfig([globalIgnores([
             argsIgnorePattern: "^_.*?$",
         }],
 
-        "import/order": ["warn", {
-            groups: [
-                "type",
-                "builtin",
-                "object",
-                "external",
-                "internal",
-                "parent",
-                "sibling",
-                "index",
-            ],
+        // "import/order": ["warn", {
+        //     groups: [
+        //         "type",
+        //         "builtin",
+        //         "object",
+        //         "external",
+        //         "internal",
+        //         "parent",
+        //         "sibling",
+        //         "index",
+        //     ],
 
-            pathGroups: [{
-                pattern: "~/**",
-                group: "external",
-                position: "after",
-            }],
+        //     pathGroups: [{
+        //         pattern: "~/**",
+        //         group: "external",
+        //         position: "after",
+        //     }],
 
-            "newlines-between": "always",
-        }],
+        //     "newlines-between": "always",
+        // }],
 
         "react/self-closing-comp": "warn",
 
         "react/jsx-sort-props": ["warn", {
             callbacksLast: true,
             shorthandFirst: true,
-            // noSortAlphabetically: false,
+            noSortAlphabetically: true,
             reservedFirst: true,
         }],
 

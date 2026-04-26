@@ -11,13 +11,15 @@ import type {
 } from "@/entities/operation/api/types";
 import OperationRemoteApi from "@/entities/operation/api/remote";
 import { operationLocalStorageApi } from "@/entities/operation/api/local-storage";
-import type { IListResult } from "@/shared/api/types";
+import type { IListParams, IListResult } from "@/shared/api/types";
 
 export class OperationStore {
   private readonly injectedApi: IOperationApi | null;
 
   operations: IOperation[] = [];
-  loading = false;
+  hasMore: boolean = false;
+  listParams: IListParams = {};
+  loading: boolean = false;
   error: string | null = null;
 
   constructor(api?: IOperationApi) {
@@ -34,14 +36,18 @@ export class OperationStore {
       : operationLocalStorageApi;
   }
 
-  async loadOperations(params?: IOperationListParams): Promise<void> {
+  async loadOperations(params: IOperationListParams = {}): Promise<void> {
     this.loading = true;
     this.error = null;
+    if (!params?.page) {
+      params.page = 0;
+    }
     try {
-      const result: IListResult<IOperation> =
-        await this.resolveApi().listOperations(params);
+      const result: IListResult<IOperation> = await this.resolveApi().listOperations(params);
       runInAction(() => {
         this.operations = result.items;
+        this.hasMore = result.more;
+        this.listParams = params;
       });
     } catch (e) {
       runInAction(() => {
@@ -53,6 +59,21 @@ export class OperationStore {
         this.loading = false;
       });
     }
+  }
+
+  nextPage(): Promise<void> {
+    if (!this.operations.length) {
+      throw new Error();
+    }
+
+    if (!this.hasMore) {
+      return Promise.resolve();
+    }
+    const params = {
+      ...this.listParams,
+      page: (this.listParams.page || 0) + 1
+    };
+    return this.loadOperations(params);
   }
 
   async createOperation(

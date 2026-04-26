@@ -8,7 +8,7 @@ import {
   TableCell,
   TableColumn,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@heroui/table";
 import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
@@ -20,6 +20,47 @@ import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 import type { IOperation } from "@/entities/operation/model/types";
 import { AuthorDropdown } from "@/features/author-dropdown";
 import { CategoryFilter } from "@/features/category-filter";
+import { Chip } from "@heroui/chip";
+import { CategoryType } from '@/entities/category';
+
+const CATEGORY_TYPES = {
+  [CategoryType.Expense]: 'Расход',
+  [CategoryType.Income]: 'Доход'
+} as const;
+
+interface IOperationTypeFilterProps {
+  selectedKey: CategoryType | null;
+  onSelectedKeyChanged(selectedKey: CategoryType | null): void;
+}
+
+function OperationTypeFilter(props: IOperationTypeFilterProps) {
+
+  return (
+    <div className="flex gap-x-2">
+      <Chip 
+        className="cursor-pointer"
+        variant="flat" 
+        color={!props.selectedKey ? 'primary' : 'default'}
+        onClick={() => props.onSelectedKeyChanged(null)}> 
+          Все
+        </Chip>
+      { Object.values(CategoryType).filter((type) => (
+        //@ts-expect-error
+          !!CATEGORY_TYPES[type]
+      )).map((type) => (
+        <Chip 
+          key={type}
+          variant="flat"
+          color={props.selectedKey === type ? 'primary' : 'default'}
+          className="cursor-pointer"
+          onClick={() => props.onSelectedKeyChanged(type)}>
+              {/* @ts-expect-error */}
+            {CATEGORY_TYPES[type]}
+          </Chip>
+      )) }
+    </div>
+  )
+}
 
 export const OperationList = observer(function OperationList() {
   const { workspace, operation } = useRootStore();
@@ -33,13 +74,10 @@ export const OperationList = observer(function OperationList() {
     null
   );
 
-  const loadData = useCallback(() => {
-    void workspace.loadWorkspaces();
-  }, [workspace]);
+  const [operationType, setOperationType] = useState<CategoryType | null>(null);
 
   useEffect(() => {
-    console.info('loadData')
-    loadData();
+    void workspace.loadWorkspaces();
   }, []);
 
   const activeWorkspace = workspace.activeWorkspace;
@@ -52,7 +90,12 @@ export const OperationList = observer(function OperationList() {
       dateFrom?: string;
       dateTo?: string;
       categoryId?: number;
-    } = { workspaceId: activeWorkspace.id };
+      limit: number;
+      type?: CategoryType;
+    } = {
+      workspaceId: activeWorkspace.id,
+      limit: 30
+    };
     if (authorId !== "") params.userId = authorId;
     if (dateFrom) params.dateFrom = new Date(dateFrom).toISOString();
     if (dateTo) {
@@ -60,9 +103,20 @@ export const OperationList = observer(function OperationList() {
       d.setHours(23, 59, 59, 999);
       params.dateTo = d.toISOString();
     }
+    if (operationType) {
+      params.type = operationType;
+    }
     if (categoryId) params.categoryId = Number(categoryId);
     void operation.loadOperations(params);
-  }, [activeWorkspace?.id, authorId, dateFrom, dateTo, categoryId, operation]);
+  }, [
+    activeWorkspace?.id,
+    authorId,
+    dateFrom,
+    dateTo,
+    categoryId,
+    operation,
+    operationType
+  ]);
 
   const openCreate = () => {
     setEditingOperation(null);
@@ -83,6 +137,14 @@ export const OperationList = observer(function OperationList() {
     if (!window.confirm(`Удалить операцию «${op.title}»?`)) return;
     await operation.deleteOperation(op.id);
   };
+
+  const onSelectedTypeChanged = useCallback((selectedKey: CategoryType) => {
+    setOperationType(selectedKey);
+  }, []);
+
+  const onLoadMore = useCallback(() => {
+    operation.nextPage();
+  }, [operation]);
 
   return (
     <>
@@ -115,19 +177,29 @@ export const OperationList = observer(function OperationList() {
           </div>
         </Card>
 
-        {operation.loading && operation.operations.length === 0 && (
-          <div className="flex items-center gap-2 text-default-500">
-            <Spinner size="sm" />
-            <span>Загрузка операций…</span>
-          </div>
-        )}
+        <Card className="p-4">
+          <OperationTypeFilter selectedKey={operationType} onSelectedKeyChanged={onSelectedTypeChanged} />
+        </Card>
 
         {operation.error && (
           <Card className="p-3 text-sm text-danger">{operation.error}</Card>
         )}
 
         <Card className="p-2">
-          <Table aria-label="Список операций">
+          <Table
+            isHeaderSticky
+            bottomContent={
+              operation.hasMore && (
+                <div className="flex w-full justify-center">
+                  <Button variant="light" onPress={onLoadMore}>Ещё</Button>
+                </div>
+              )
+            }
+            classNames={{
+              base: "max-h-[520px] overflow-scroll",
+              table: "min-h-[420px]",
+            }}
+            aria-label="Список операций">
             <TableHeader>
               <TableColumn>Дата</TableColumn>
               <TableColumn>Название</TableColumn>
@@ -138,7 +210,13 @@ export const OperationList = observer(function OperationList() {
                 Действия
               </TableColumn>
             </TableHeader>
-            <TableBody emptyContent="Операций пока нет">
+            <TableBody isLoading={operation.loading} loadingContent={
+              <div className="flex items-center gap-2 text-default-500">
+                <Spinner size="sm" />
+                <span>Загрузка операций…</span>
+              </div>
+            }
+              emptyContent="Операций пока нет">
               {operation.operations.map((op) => {
                 return (
                   <TableRow key={op.id}>
@@ -202,8 +280,8 @@ export const OperationList = observer(function OperationList() {
 
       <OperationFormModal
         isOpen={modalOpen}
-        onClose={closeModal}
         editOperation={editingOperation}
+        onClose={closeModal}
       />
     </>
   );

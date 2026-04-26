@@ -26,7 +26,7 @@ export const Dashboard = observer(function Dashboard() {
 
   useEffect(() => {
     void workspace.loadWorkspaces();
-  }, [workspace]);
+  }, []);
 
   const activeWorkspace = workspace.activeWorkspace;
 

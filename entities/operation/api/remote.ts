@@ -72,17 +72,21 @@ export default class OperationRemoteApi implements IOperationApi {
     if (params.limit != null) {
       searchParams.set("limit", String(params.limit));
     }
-    if (params.offset != null) {
-      searchParams.set("offset", String(params.offset));
+    if (params.page != null) {
+      searchParams.set("page", String(params.page));
+    }
+
+    if (!!params.type) {
+      searchParams.set('type', params.type);
     }
 
     const raw = await this._fetchJson<{
       items: ApiOperationRow[];
-      total: number;
+      more: boolean;
     }>(`operation?${searchParams.toString()}`);
 
     const items = (raw.items ?? []).map(mapOperation);
-    return { items, total: raw.total ?? items.length };
+    return { items, more: raw.more };
   }
 
   async getOperationById(id: OperationId): Promise<IOperation | null> {
