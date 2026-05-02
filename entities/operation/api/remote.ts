@@ -14,6 +14,7 @@ import type {
 import type { CategoryId } from "@/entities/category/model/types";
 import type { UserId } from "@/entities/user/model/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
+import { HTTPClient } from '@/shared/api/http';
 
 type ApiOperationRow = {
   id?: number;
@@ -49,6 +50,9 @@ interface IRequestParams {
 }
 
 export default class OperationRemoteApi implements IOperationApi {
+
+  private readonly _httpClient = new HTTPClient();
+
   async listOperations(
     params?: IOperationListParams,
   ): Promise<IListResult<IOperation>> {
@@ -158,6 +162,24 @@ export default class OperationRemoteApi implements IOperationApi {
 
   async deleteOperation(id: OperationId): Promise<void> {
     await this._fetchJson(`operation/${id}`, { method: "DELETE" });
+  }
+
+  async batchImport(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    const importResult = await this._httpClient.fetch(
+      'operation/import',
+      {
+        // headers: {
+        //   'Content-Type': 'multipart/form-data; boundary=something_unique'
+        // },
+        body: formData,
+        method: 'POST',
+        headers: new Headers()
+      }
+    )
+    console.info(importResult);
   }
 
   private async _rawFetch(

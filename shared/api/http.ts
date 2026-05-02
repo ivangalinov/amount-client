@@ -11,7 +11,7 @@ export class HTTPClient {
     ): Promise<Response> {
         const headers = new Headers(init?.headers);
 
-        if (init?.body != null && !headers.has("Content-Type")) {
+        if (init?.body != null && !headers.has("Content-Type") && !init.headers) {
             headers.set("Content-Type", "application/json");
         }
 

@@ -20,6 +20,7 @@ import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 import type { IOperation } from "@/entities/operation/model/types";
 import { AuthorDropdown } from "@/features/author-dropdown";
 import { CategoryFilter } from "@/features/category-filter";
+import { ButtonImport } from '@/features/import-action';
 import { Chip } from "@heroui/chip";
 import { CategoryType } from '@/entities/category';
 
@@ -151,9 +152,12 @@ export const OperationList = observer(function OperationList() {
       <section className="flex flex-col gap-6 py-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-2xl font-semibold">Операции</h1>
-          <Button color="primary" onPress={openCreate}>
-            Добавить операцию
-          </Button>
+          <div className="flex gap-3">
+            <ButtonImport />
+            <Button color="primary" onPress={openCreate}>
+              Добавить операцию
+            </Button>
+          </div>
         </div>
 
         <Card className="p-4">
