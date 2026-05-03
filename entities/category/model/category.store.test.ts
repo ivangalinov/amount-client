@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { ICategory, CategoryId } from "@/entities/category/model/types";
+import type { ICategory } from "@/entities/category/model/types";
 import { CategoryType } from "@/entities/category/model/types";
 import type { ICategoryApi } from "@/entities/category/api/types";
 import { CategoryStore } from "@/entities/category/model/category.store";

@@ -3,7 +3,6 @@ import { IListParams, IListResult } from '@/shared/api/types';
 import { HTTPClient } from '@/shared/api/http';
 import { IWorkspace, WorkspaceId, IWorkspaceUser } from '../model/types';
 import { IWorkspaceApi } from './types';
-import { getApiBase } from '@/shared/lib/api-base';
 
 export default class WorkspaceRemoteAPI implements IWorkspaceApi {
 

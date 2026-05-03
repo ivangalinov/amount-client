@@ -54,28 +54,28 @@ export const RegisterPage = observer(function RegisterPage() {
               type="text"
               autoComplete="name"
               value={name}
-              onValueChange={setName}
               description="Необязательно"
               variant="bordered"
+              onValueChange={setName}
             />
             <Input
+              isRequired
               label="Email"
               type="email"
               autoComplete="email"
               value={email}
-              onValueChange={setEmail}
-              isRequired
               variant="bordered"
+              onValueChange={setEmail}
             />
             <Input
+              isRequired
               label="Пароль"
               type="password"
               autoComplete="new-password"
               value={password}
-              onValueChange={setPassword}
-              isRequired
               description="Минимум 8 символов"
               variant="bordered"
+              onValueChange={setPassword}
             />
             {formError ? (
               <p className="text-sm text-danger">{formError}</p>

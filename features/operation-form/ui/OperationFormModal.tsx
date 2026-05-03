@@ -143,39 +143,39 @@ const OperationFormModal = observer(function OperationFormModal({
                 </p>
               )}
               <Input
+                autoFocus
                 type="number"
                 label="Сумма"
                 placeholder="например -500 или 1000"
                 value={amount}
+                isInvalid={!!amountError}
+                errorMessage={amountError}
                 onValueChange={(value) => {
                   setAmount(value);
                   if (amountError) setAmountError(null);
                 }}
-                autoFocus
-                isInvalid={!!amountError}
-                errorMessage={amountError}
               />
               <Input
                 label="Название"
                 placeholder="Описание операции"
                 value={title}
+                isInvalid={!!titleError}
+                errorMessage={titleError}
                 onValueChange={(value) => {
                   setTitle(value);
                   if (titleError) setTitleError(null);
                 }}
-                isInvalid={!!titleError}
-                errorMessage={titleError}
               />
               <Select
                 label="Категория"
                 placeholder="Выберите категорию"
                 selectedKeys={categoryId ? [categoryId] : []}
+                isInvalid={!!categoryError}
+                errorMessage={categoryError}
                 onSelectionChange={(keys) => {
                   const v = Array.from(keys)[0];
                   setCategoryId(v != null ? String(v) : "");
                 }}
-                isInvalid={!!categoryError}
-                errorMessage={categoryError}
               >
                 {categories.map((cat) => (
                   <SelectItem key={String(cat.id)} textValue={cat.name}>
@@ -202,8 +202,8 @@ const OperationFormModal = observer(function OperationFormModal({
               </Button>
               <Button
                 color="primary"
-                onPress={handleSubmit}
                 isLoading={submitting}
+                onPress={handleSubmit}
               >
                 {isEdit ? "Сохранить" : "Добавить"}
               </Button>

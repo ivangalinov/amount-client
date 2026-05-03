@@ -119,16 +119,16 @@ const CategoryFormModal = observer(function CategoryFormModal({
                 </p>
               )}
               <Input
+                autoFocus
                 label="Название"
                 placeholder="Например: Продукты"
                 value={name}
+                isInvalid={!!nameError}
+                errorMessage={nameError}
                 onValueChange={(value) => {
                   setName(value);
                   if (nameError) setNameError(null);
                 }}
-                isInvalid={!!nameError}
-                errorMessage={nameError}
-                autoFocus
               />
               <Select
                 label="Тип"
@@ -150,14 +150,14 @@ const CategoryFormModal = observer(function CategoryFormModal({
                   <input
                     type="color"
                     value={color}
-                    onChange={(e) => setColor(e.target.value)}
                     className="w-10 h-10 rounded cursor-pointer border border-default-200"
+                    onChange={(e) => setColor(e.target.value)}
                   />
                   <Input
                     placeholder="#6366f1"
                     value={color}
-                    onValueChange={setColor}
                     classNames={{ base: "flex-1" }}
+                    onValueChange={setColor}
                   />
                 </div>
               </div>
@@ -174,8 +174,8 @@ const CategoryFormModal = observer(function CategoryFormModal({
               </Button>
               <Button
                 color="primary"
-                onPress={handleSubmit}
                 isLoading={submitting}
+                onPress={handleSubmit}
               >
                 {isEdit ? "Сохранить" : "Добавить"}
               </Button>

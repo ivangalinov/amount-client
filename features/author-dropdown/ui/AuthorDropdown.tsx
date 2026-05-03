@@ -39,10 +39,10 @@ export const AuthorDropdown = observer(function AuthorDropdown({
     <AuthorDropdownUI
       users={workspace.workspaceUsers}
       selectedUserId={selectedUserId}
-      onAuthorChange={onAuthorChange}
       label={label}
       placeholder={placeholder}
       classNames={classNames}
+      onAuthorChange={onAuthorChange}
     />
   );
 });

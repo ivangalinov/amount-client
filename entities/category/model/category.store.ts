@@ -10,7 +10,6 @@ import type {
   ICategoryListParams,
   ICategoryUpdatePayload,
 } from "@/entities/category/api/types";
-import { categoryLocalStorageApi } from "@/entities/category/api/local-storage";
 import CategoryAPI from '@/entities/category/api/remote';
 import type { IListResult } from "@/shared/api/types";
 

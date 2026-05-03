@@ -24,6 +24,8 @@ export interface IOperationCreatePayload {
   userId?: UserId;
   workspaceId: WorkspaceId;
   createdAt?: string;
+  extKey?: string;
+  extSource?: string;
 }
 
 export interface IOperationUpdatePayload {
@@ -40,5 +42,18 @@ export interface IOperationApi {
   createOperation(payload: IOperationCreatePayload): Promise<IOperation>;
   updateOperation(payload: IOperationUpdatePayload): Promise<IOperation>;
   deleteOperation(id: OperationId): Promise<void>;
+}
+
+export type OperationImportSource = "sber" | "tinkoff";
+
+export interface IOperationImportRow {
+  amount: number;
+  category_id: CategoryId | null;
+  type: CategoryType;
+  created: string;
+  ext_key: string;
+  ext_source: string;
+  origin: string;
+  errors: string[] | null;
 }
 

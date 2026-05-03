@@ -37,10 +37,10 @@ export const CategoryFilter = observer(function CategoryFilter({
     <CategoryFilterUI
       categories={categoryStore.categories}
       selectedCategoryId={selectedCategoryId}
-      onCategoryChange={onCategoryChange}
       label={label}
       placeholder={placeholder}
       classNames={classNames}
+      onCategoryChange={onCategoryChange}
     />
   );
 });

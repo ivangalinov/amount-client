@@ -31,11 +31,11 @@ export function AuthorDropdown({
       label={label}
       placeholder={placeholder}
       selectedKeys={selectedUserId !== "" ? [String(selectedUserId)] : []}
+      classNames={classNames ?? { base: "max-w-[200px]" }}
       onSelectionChange={(keys) => {
         const v = Array.from(keys)[0];
         onAuthorChange(v != null && v !== "" ? Number(v) : "");
       }}
-      classNames={classNames ?? { base: "max-w-[200px]" }}
     >
       {users.map((u) => (
         <SelectItem key={String(u.id)} textValue={u.name}>

@@ -31,11 +31,11 @@ export function CategoryFilter({
       label={label}
       placeholder={placeholder}
       selectedKeys={selectedCategoryId ? [selectedCategoryId] : []}
+      classNames={classNames ?? { base: "max-w-[200px]" }}
       onSelectionChange={(keys) => {
         const v = Array.from(keys)[0];
         onCategoryChange(v != null ? String(v) : "");
       }}
-      classNames={classNames ?? { base: "max-w-[200px]" }}
     >
       {categories.map((cat) => (
         <SelectItem key={String(cat.id)} textValue={cat.name}>

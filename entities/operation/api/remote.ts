@@ -7,8 +7,10 @@ import type {
 } from "@/entities/operation/model/types";
 import type {
   IOperationApi,
+  IOperationImportRow,
   IOperationCreatePayload,
   IOperationListParams,
+  OperationImportSource,
   IOperationUpdatePayload,
 } from "@/entities/operation/api/types";
 import type { CategoryId } from "@/entities/category/model/types";
@@ -47,6 +49,14 @@ function mapOperation(row: ApiOperationRow): IOperation {
 interface IRequestParams {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
+}
+
+interface IBulkUpdateResult {
+  created: number;
+}
+interface IBulkUpdateParams {
+  workspaceId: number;
+  items: Omit<IOperationImportRow, 'errors' | 'origin'>[];
 }
 
 export default class OperationRemoteApi implements IOperationApi {
@@ -120,6 +130,12 @@ export default class OperationRemoteApi implements IOperationApi {
     if (payload.createdAt != null) {
       body.created = payload.createdAt;
     }
+    if (payload.extKey != null) {
+      body.ext_key = payload.extKey;
+    }
+    if (payload.extSource != null) {
+      body.ext_source = payload.extSource;
+    }
     const row = await this._fetchJson<ApiOperationRow>("operation", {
       method: "POST",
       body,
@@ -128,6 +144,17 @@ export default class OperationRemoteApi implements IOperationApi {
       throw new Error("Сервер не вернул созданную операцию");
     }
     return mapOperation(row);
+  }
+
+  async bulkUpdate(params: IBulkUpdateParams): Promise<IBulkUpdateResult> {
+    const result = await this._httpClient.fetch(
+      '/operation/bulk',
+      {
+        method: 'POST',
+        body: JSON.stringify(params)
+      }
+    )
+    return result.json();
   }
 
   async updateOperation(
@@ -164,22 +191,39 @@ export default class OperationRemoteApi implements IOperationApi {
     await this._fetchJson(`operation/${id}`, { method: "DELETE" });
   }
 
-  async batchImport(file: File): Promise<void> {
+  async batchImport(
+    file: File,
+    source: OperationImportSource,
+  ): Promise<IOperationImportRow[]> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
+    formData.append("file", file);
+    formData.append("filename", file.name);
+    const searchParams = new URLSearchParams();
+    searchParams.set('source', source);
     const importResult = await this._httpClient.fetch(
-      'operation/import',
+      "operation/import",
       {
-        // headers: {
-        //   'Content-Type': 'multipart/form-data; boundary=something_unique'
-        // },
         body: formData,
-        method: 'POST',
-        headers: new Headers()
-      }
-    )
-    console.info(importResult);
+        method: "POST",
+        headers: new Headers(),
+      },
+      searchParams
+    );
+    if (!importResult.ok) {
+      const errText = await importResult.text();
+      throw new Error(
+        parseFastApiError(errText) ||
+          `HTTP ${importResult.status} ${importResult.statusText}`,
+      );
+    }
+
+    const text = await importResult.text();
+    if (!text.trim()) {
+      return [];
+    }
+
+    const payload = JSON.parse(text) as { items?: IOperationImportRow[] };
+    return payload.items ?? [];
   }
 
   private async _rawFetch(

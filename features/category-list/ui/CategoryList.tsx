@@ -137,8 +137,8 @@ export const CategoryList = observer(function CategoryList() {
 
       <CategoryFormModal
         isOpen={modalOpen}
-        onClose={closeModal}
         editCategory={editingCategory}
+        onClose={closeModal}
       />
     </>
   );

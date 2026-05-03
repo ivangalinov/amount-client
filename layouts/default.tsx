@@ -3,9 +3,6 @@ import { Link } from "@heroui/link";
 import { Head } from "./head";
 
 import { Navbar } from "@/components/navbar";
-import { SideBar, SideBarItem } from "@/shared/ui/sidebar";
-import { siteConfig } from "@/config/site";
-import NextLink from "next/link";
 
 export default function DefaultLayout({
   children,
