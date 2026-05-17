@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, makeObservable, observable, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 
 interface IListResult<T> {
     items: T[];

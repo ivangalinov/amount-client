@@ -2,6 +2,7 @@ import { Link } from "@heroui/link";
 
 import { Head } from "./head";
 
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Navbar } from "@/components/navbar";
 
 export default function DefaultLayout({
@@ -13,10 +14,11 @@ export default function DefaultLayout({
     <div className="relative flex flex-col h-screen">
       <Head />
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-16 pb-[calc(4rem+env(safe-area-inset-bottom))] sm:px-6 lg:pb-0">
         {children}
       </main>
-      <footer className="w-full flex items-center justify-center py-3">
+      <MobileBottomNav />
+      <footer className="hidden w-full items-center justify-center py-3 lg:flex">
         <Link
           isExternal
           className="flex items-center gap-1 text-current"

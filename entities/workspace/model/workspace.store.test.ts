@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type {
   IWorkspace,
-  WorkspaceId,
   IWorkspaceUser,
 } from "@/entities/workspace/model/types";
 import type { IWorkspaceApi } from "@/entities/workspace/api/types";
