@@ -44,10 +44,7 @@ describe("OperationStore", () => {
 
   describe("initial state", () => {
     it("has empty operations and zero balance/totals", () => {
-      expect(store.operations).toEqual([]);
-      expect(store.balance).toBe(0);
-      expect(store.totalIncome).toBe(0);
-      expect(store.totalExpense).toBe(0);
+      expect(store.items).toEqual([]);
     });
   });
 
@@ -69,12 +66,9 @@ describe("OperationStore", () => {
       });
       store = new OperationStore(api);
 
-      await store.loadOperations();
+      await store.load({ filter: {}, navigation: { limit: 10, page: 0 } });
 
-      expect(store.operations).toEqual(ops);
-      expect(store.balance).toBe(-100);
-      expect(store.totalExpense).toBe(-100);
-      expect(store.totalIncome).toBe(0);
+      expect(store.items).toEqual(ops);
       expect(store.loading).toBe(false);
     });
 
@@ -86,9 +80,9 @@ describe("OperationStore", () => {
       });
       store = new OperationStore(api);
 
-      await store.loadOperations();
+      await store.load({filter: {}, navigation: {limit: 10, page: 0}});
 
-      expect(store.operations).toEqual([]);
+      expect(store.items).toEqual([]);
       expect(store.error).toBe("Load failed");
     });
   });
@@ -128,11 +122,8 @@ describe("OperationStore", () => {
         listOperations: async () => ({ items: ops, total: 3 }),
       });
       store = new OperationStore(api);
-      await store.loadOperations();
-
-      expect(store.totalIncome).toBe(1000);
-      expect(store.totalExpense).toBe(-500);
-      expect(store.balance).toBe(500);
+      await store.load({ filter: {}, navigation: { limit: 10, page: 0 } });
+      expect(store.items).toHaveLength(3);
     });
   });
 
@@ -146,7 +137,7 @@ describe("OperationStore", () => {
       store = new OperationStore(api);
 
       await expect(
-        store.createOperation({
+        store.create({
           amount: -50,
           categoryId: 1,
           title: "Кофе",
@@ -155,7 +146,7 @@ describe("OperationStore", () => {
         })
       ).rejects.toThrow("Create failed");
 
-      expect(store.operations).toHaveLength(0);
+      expect(store.items).toHaveLength(0);
       expect(store.error).toBe("Create failed");
       expect(store.loading).toBe(false);
     });
@@ -181,12 +172,11 @@ describe("OperationStore", () => {
       });
       store = new OperationStore(api);
 
-      const created = await store.createOperation(payload);
+      const created = await store.create(payload);
 
       expect(created.title).toBe("Кофе");
       expect(created.amount).toBe(-50);
-      expect(store.operations).toHaveLength(1);
-      expect(store.balance).toBe(-50);
+      expect(store.items).toHaveLength(1);
     });
   });
 
@@ -216,13 +206,12 @@ describe("OperationStore", () => {
         }),
       });
       store = new OperationStore(api);
-      await store.loadOperations();
+      await store.load({ filter: {}, navigation: { limit: 10, page: 0 } });
 
-      await store.updateOperation({ id: 1, amount: -150, title: "Обед в кафе" });
+      await store.update({ id: 1, amount: -150, title: "Обед в кафе" });
 
-      expect(store.operations[0].amount).toBe(-150);
-      expect(store.operations[0].title).toBe("Обед в кафе");
-      expect(store.balance).toBe(-150);
+      expect(store.items[0].amount).toBe(-150);
+      expect(store.items[0].title).toBe("Обед в кафе");
     });
   });
 
@@ -244,12 +233,11 @@ describe("OperationStore", () => {
         deleteOperation: async () => {},
       });
       store = new OperationStore(api);
-      await store.loadOperations();
+      await store.load({ filter: {}, navigation: { limit: 10, page: 0 } });
 
-      await store.deleteOperation(1);
+      await store.delete(1);
 
-      expect(store.operations).toHaveLength(0);
-      expect(store.balance).toBe(0);
+      expect(store.items).toHaveLength(0);
     });
 
     it("sets error and rethrows when API throws, operations unchanged", async () => {
@@ -271,11 +259,11 @@ describe("OperationStore", () => {
         },
       });
       store = new OperationStore(api);
-      await store.loadOperations();
+      await store.load({ filter: {}, navigation: { limit: 10, page: 0 } });
 
-      await expect(store.deleteOperation(1)).rejects.toThrow("Delete failed");
+      await expect(store.delete(1)).rejects.toThrow("Delete failed");
 
-      expect(store.operations).toHaveLength(1);
+      expect(store.items).toHaveLength(1);
       expect(store.error).toBe("Delete failed");
       expect(store.loading).toBe(false);
     });

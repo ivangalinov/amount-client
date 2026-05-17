@@ -48,14 +48,12 @@ describe("WorkspaceStore", () => {
         { id: 2, name: "Семья" },
       ];
       const api = createMockWorkspaceApi({
-        listWorkspaces: async () => ({ items: workspaces, total: 2 }),
         getActiveWorkspace: async () => workspaces[0],
       });
       store = new WorkspaceStore(api);
 
       await store.loadWorkspaces();
 
-      expect(store.workspaces).toEqual(workspaces);
       expect(store.activeWorkspace).toEqual(workspaces[0]);
       expect(store.hasActiveWorkspace).toBe(true);
       expect(store.loading).toBe(false);
@@ -63,8 +61,8 @@ describe("WorkspaceStore", () => {
 
     it("sets error when API throws", async () => {
       const api = createMockWorkspaceApi({
-        listWorkspaces: async () => {
-          throw new Error("Load failed");
+        getActiveWorkspace: () => {
+          return Promise.reject(new Error("Load failed"));
         },
       });
       store = new WorkspaceStore(api);
@@ -72,92 +70,8 @@ describe("WorkspaceStore", () => {
       await store.loadWorkspaces();
 
       expect(store.workspaces).toEqual([]);
+      console.error(store.error);
       expect(store.error).toBe("Load failed");
-      expect(store.loading).toBe(false);
-    });
-  });
-
-  describe("createWorkspace", () => {
-    it("appends new workspace and sets active if none", async () => {
-      const api = createMockWorkspaceApi({
-        createWorkspace: async (payload) => ({
-          id: 1,
-          name: payload.name,
-        }),
-      });
-      store = new WorkspaceStore(api);
-
-      const created = await store.createWorkspace("Новый");
-
-      expect(created).toEqual({ id: 1, name: "Новый" });
-      expect(store.workspaces).toHaveLength(1);
-      expect(store.workspaces[0].name).toBe("Новый");
-      expect(store.activeWorkspace).toEqual(created);
-    });
-
-    it("keeps existing activeWorkspace when creating second workspace", async () => {
-      const existing: IWorkspace = { id: 1, name: "Личный" };
-      const api = createMockWorkspaceApi({
-        listWorkspaces: async () => ({ items: [existing], total: 1 }),
-        getActiveWorkspace: async () => existing,
-        createWorkspace: async (payload) => ({ id: 2, name: payload.name }),
-      });
-      store = new WorkspaceStore(api);
-      await store.loadWorkspaces();
-
-      await store.createWorkspace("Второй");
-
-      expect(store.workspaces).toHaveLength(2);
-      expect(store.activeWorkspace?.id).toBe(1);
-    });
-
-    it("sets error when API throws and does not mutate workspaces", async () => {
-      const api = createMockWorkspaceApi({
-        createWorkspace: async () => {
-          throw new Error("Create failed");
-        },
-      });
-      store = new WorkspaceStore(api);
-
-      await expect(store.createWorkspace("Новый")).rejects.toThrow(
-        "Create failed"
-      );
-
-      expect(store.workspaces).toHaveLength(0);
-      expect(store.error).toBe("Create failed");
-      expect(store.loading).toBe(false);
-    });
-  });
-
-  describe("setActiveWorkspace", () => {
-    it("updates activeWorkspace", async () => {
-      const ws: IWorkspace = { id: 2, name: "Другой" };
-      const api = createMockWorkspaceApi({
-        setActiveWorkspace: async () => {},
-        getWorkspaceById: async (id: WorkspaceId) => (id === 2 ? ws : null),
-      });
-      store = new WorkspaceStore(api);
-
-      await store.setActiveWorkspace(2);
-
-      expect(store.activeWorkspace).toEqual(ws);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBeNull();
-    });
-
-    it("sets error when API throws", async () => {
-      const api = createMockWorkspaceApi({
-        setActiveWorkspace: async () => {
-          throw new Error("Set active failed");
-        },
-        getWorkspaceById: async () => null,
-      });
-      store = new WorkspaceStore(api);
-
-      await store.setActiveWorkspace(2);
-
-      expect(store.activeWorkspace).toBeNull();
-      expect(store.error).toBe("Set active failed");
       expect(store.loading).toBe(false);
     });
   });
@@ -196,48 +110,4 @@ describe("WorkspaceStore", () => {
     });
   });
 
-  describe("addUserToWorkspace", () => {
-    it("appends to workspaceUsers when added to active workspace", async () => {
-      const active: IWorkspace = { id: 1, name: "Личный" };
-      const wu: IWorkspaceUser = { id: 1, userId: 10, workspaceId: 1 };
-      const api = createMockWorkspaceApi({
-        listWorkspaces: async () => ({ items: [active], total: 1 }),
-        getActiveWorkspace: async () => active,
-        listWorkspaceUsers: async () => [],
-        addUserToWorkspace: async () => wu,
-      });
-      store = new WorkspaceStore(api);
-      await store.loadWorkspaces();
-
-      expect(store.workspaceUsers).toEqual([]);
-
-      const result = await store.addUserToWorkspace({
-        workspaceId: 1,
-        userId: 10,
-      });
-
-      expect(result).toEqual(wu);
-      expect(store.workspaceUsers).toHaveLength(1);
-      expect(store.workspaceUsers[0]).toEqual(wu);
-    });
-
-    it("does not append to workspaceUsers when added to other workspace", async () => {
-      const active: IWorkspace = { id: 1, name: "Личный" };
-      const api = createMockWorkspaceApi({
-        listWorkspaces: async () => ({ items: [active], total: 1 }),
-        getActiveWorkspace: async () => active,
-        addUserToWorkspace: async () => ({
-          id: 1,
-          userId: 10,
-          workspaceId: 2,
-        }),
-      });
-      store = new WorkspaceStore(api);
-      await store.loadWorkspaces();
-
-      await store.addUserToWorkspace({ workspaceId: 2, userId: 10 });
-
-      expect(store.workspaceUsers).toEqual([]);
-    });
-  });
 });

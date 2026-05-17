@@ -12,7 +12,7 @@ import {
 } from "@/entities/category/model/category.store";
 import {
   operationStore,
-  OperationStore,
+  OperationStore
 } from "@/entities/operation/model/operation.store";
 import { statsStore, StatsStore } from "@/entities/stats/model/stats.store";
 

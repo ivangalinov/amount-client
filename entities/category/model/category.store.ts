@@ -30,6 +30,9 @@ export class CategoryStore {
   }
 
   async loadCategories(params?: ICategoryListParams): Promise<void> {
+    if (this.categories.length) {
+      return;
+    }
     this.loading = true;
     this.error = null;
     try {
@@ -125,4 +128,3 @@ export class CategoryStore {
 }
 
 export const categoryStore = new CategoryStore();
-

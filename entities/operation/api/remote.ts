@@ -56,7 +56,7 @@ interface IBulkUpdateResult {
 }
 interface IBulkUpdateParams {
   workspaceId: number;
-  items: Omit<IOperationImportRow, 'errors' | 'origin'>[];
+  items: Omit<IOperationImportRow, 'errors' | 'origin' | 'type'>[];
 }
 
 export default class OperationRemoteApi implements IOperationApi {
@@ -151,7 +151,10 @@ export default class OperationRemoteApi implements IOperationApi {
       '/operation/bulk',
       {
         method: 'POST',
-        body: JSON.stringify(params)
+        body: JSON.stringify({
+          items: params.items,
+          workspace_id: params.workspaceId
+        })
       }
     )
     return result.json();

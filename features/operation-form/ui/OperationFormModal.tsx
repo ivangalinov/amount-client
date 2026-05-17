@@ -104,7 +104,7 @@ const OperationFormModal = observer(function OperationFormModal({
     try {
       const dateStr = new Date(createdAt).toISOString();
       if (isEdit && editOperation) {
-        await operationStore.updateOperation({
+        await operationStore.update({
           id: editOperation.id,
           amount: numAmount,
           title: title.trim(),
@@ -112,7 +112,7 @@ const OperationFormModal = observer(function OperationFormModal({
           createdAt: dateStr,
         });
       } else {
-        await operationStore.createOperation({
+        await operationStore.create({
           amount: numAmount,
           title: title.trim(),
           categoryId: catId,

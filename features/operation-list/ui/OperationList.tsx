@@ -87,36 +87,20 @@ export const OperationList = observer(function OperationList() {
     if (!activeWorkspace) return;
     const params: {
       workspaceId?: number;
-      userId?: number;
-      dateFrom?: string;
-      dateTo?: string;
-      categoryId?: number;
-      limit: number;
-      type?: CategoryType;
     } = {
-      workspaceId: activeWorkspace.id,
-      limit: 30
+      workspaceId: activeWorkspace.id
     };
-    if (authorId !== "") params.userId = authorId;
-    if (dateFrom) params.dateFrom = new Date(dateFrom).toISOString();
-    if (dateTo) {
-      const d = new Date(dateTo);
-      d.setHours(23, 59, 59, 999);
-      params.dateTo = d.toISOString();
-    }
-    if (operationType) {
-      params.type = operationType;
-    }
-    if (categoryId) params.categoryId = Number(categoryId);
-    void operation.loadOperations(params);
+    void operation.load({
+      filter: {
+        ...params
+      },
+      navigation: {
+        limit: 30,
+        page: 0
+      }
+    });
   }, [
-    activeWorkspace?.id,
-    authorId,
-    dateFrom,
-    dateTo,
-    categoryId,
-    operation,
-    operationType
+    activeWorkspace?.id
   ]);
 
   const openCreate = () => {
@@ -136,11 +120,41 @@ export const OperationList = observer(function OperationList() {
 
   const handleDelete = async (op: IOperation) => {
     if (!window.confirm(`Удалить операцию «${op.title}»?`)) return;
-    await operation.deleteOperation(op.id);
+    await operation.delete(op.id);
   };
 
   const onSelectedTypeChanged = useCallback((selectedKey: CategoryType) => {
+    operation.updateFilter({ type: selectedKey });
     setOperationType(selectedKey);
+  }, []);
+
+  const onAutorChanged = useCallback((authorId: number) => {
+    setAuthorId(authorId);
+    operation.updateFilter({
+      userId: authorId
+    });
+  }, []);
+
+  const onCategoryChange = useCallback((categoryId: string) => {
+    setCategoryId(categoryId);
+    operation.updateFilter({
+      categoryId: categoryId ? categoryId as unknown as number : undefined
+    });
+  }, []);
+
+  const onPeriodChange = useCallback((from: string, to: string) => {
+    setDateFrom(from);
+    setDateTo(to);
+    if (from) from = new Date(from).toISOString();
+    if (to) {
+      const d = new Date(to);
+      d.setHours(23, 59, 59, 999);
+      to = d.toISOString();
+    }
+    operation.updateFilter({
+      dateFrom: from,
+      dateTo: to
+    })
   }, []);
 
   const onLoadMore = useCallback(() => {
@@ -164,19 +178,16 @@ export const OperationList = observer(function OperationList() {
           <div className="flex flex-wrap items-center gap-4">
             <AuthorDropdown
               selectedUserId={authorId}
-              onAuthorChange={setAuthorId}
+              onAuthorChange={onAutorChanged}
             />
             <CategoryFilter
               selectedCategoryId={categoryId}
-              onCategoryChange={setCategoryId}
+              onCategoryChange={onCategoryChange}
             />
             <DateRangeFilter
               dateFrom={dateFrom}
               dateTo={dateTo}
-              onPeriodChange={(from, to) => {
-                setDateFrom(from);
-                setDateTo(to);
-              }}
+              onPeriodChange={onPeriodChange}
             />
           </div>
         </Card>
@@ -221,7 +232,7 @@ export const OperationList = observer(function OperationList() {
               </div>
             }
               emptyContent="Операций пока нет">
-              {operation.operations.map((op) => {
+              {operation.items.map((op) => {
                 return (
                   <TableRow key={op.id}>
                     <TableCell>
