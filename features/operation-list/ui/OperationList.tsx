@@ -20,8 +20,17 @@ import { getDefaultDateFrom, getDefaultDateTo } from "@/shared/lib/date";
 import type { IOperation } from "@/entities/operation/model/types";
 import { AuthorDropdown } from "@/features/author-dropdown";
 import { CategoryFilter } from "@/features/category-filter";
+import { ButtonImport } from '@/features/import-action';
 import { Chip } from "@heroui/chip";
 import { CategoryType } from '@/entities/category';
+import {
+  MobileDataList,
+  MobileDataListItem,
+  MobileDataListState,
+} from "@/shared/ui/mobile-data-list";
+import { FloatingActionButton } from "@/shared/ui/floating-action-button";
+import { DesktopOnly, MobileOnly } from "@/shared/ui/viewport-only";
+import clsx from 'clsx';
 
 const CATEGORY_TYPES = {
   [CategoryType.Expense]: 'Расход',
@@ -31,6 +40,63 @@ const CATEGORY_TYPES = {
 interface IOperationTypeFilterProps {
   selectedKey: CategoryType | null;
   onSelectedKeyChanged(selectedKey: CategoryType | null): void;
+}
+
+function formatOperationDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatOperationAmount(amount: number): string {
+  return `${amount > 0 ? "+" : ""}${amount.toFixed(2)}`;
+}
+
+function OperationCategoryLabel({ op }: { op: IOperation }) {
+  if (!op.categoryId) {
+    return <span className="text-default-400">—</span>;
+  }
+
+  return (
+    <span
+      className="inline-flex items-center gap-1.5"
+      style={{ color: op.categoryColor }}
+    >
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: op.categoryColor }}
+      />
+      {op.categoryName}
+    </span>
+  );
+}
+
+interface IOperationRowActionsProps {
+  op: IOperation;
+  onEdit: (op: IOperation) => void;
+  onDelete: (op: IOperation) => void;
+}
+
+function OperationRowActions({ op, onEdit, onDelete }: IOperationRowActionsProps) {
+  return (
+    <>
+      <Button size="sm" variant="flat" onPress={() => onEdit(op)}>
+        Изменить
+      </Button>
+      <Button
+        color="danger"
+        size="sm"
+        variant="flat"
+        onPress={() => onDelete(op)}
+      >
+        Удалить
+      </Button>
+    </>
+  );
 }
 
 function OperationTypeFilter(props: IOperationTypeFilterProps) {
@@ -86,36 +152,20 @@ export const OperationList = observer(function OperationList() {
     if (!activeWorkspace) return;
     const params: {
       workspaceId?: number;
-      userId?: number;
-      dateFrom?: string;
-      dateTo?: string;
-      categoryId?: number;
-      limit: number;
-      type?: CategoryType;
     } = {
-      workspaceId: activeWorkspace.id,
-      limit: 30
+      workspaceId: activeWorkspace.id
     };
-    if (authorId !== "") params.userId = authorId;
-    if (dateFrom) params.dateFrom = new Date(dateFrom).toISOString();
-    if (dateTo) {
-      const d = new Date(dateTo);
-      d.setHours(23, 59, 59, 999);
-      params.dateTo = d.toISOString();
-    }
-    if (operationType) {
-      params.type = operationType;
-    }
-    if (categoryId) params.categoryId = Number(categoryId);
-    void operation.loadOperations(params);
+    void operation.load({
+      filter: {
+        ...params
+      },
+      navigation: {
+        limit: 30,
+        page: 0
+      }
+    });
   }, [
-    activeWorkspace?.id,
-    authorId,
-    dateFrom,
-    dateTo,
-    categoryId,
-    operation,
-    operationType
+    activeWorkspace?.id
   ]);
 
   const openCreate = () => {
@@ -135,11 +185,41 @@ export const OperationList = observer(function OperationList() {
 
   const handleDelete = async (op: IOperation) => {
     if (!window.confirm(`Удалить операцию «${op.title}»?`)) return;
-    await operation.deleteOperation(op.id);
+    await operation.delete(op.id);
   };
 
   const onSelectedTypeChanged = useCallback((selectedKey: CategoryType) => {
+    operation.updateFilter({ type: selectedKey });
     setOperationType(selectedKey);
+  }, []);
+
+  const onAutorChanged = useCallback((authorId: number) => {
+    setAuthorId(authorId);
+    operation.updateFilter({
+      userId: authorId
+    });
+  }, []);
+
+  const onCategoryChange = useCallback((categoryId: string) => {
+    setCategoryId(categoryId);
+    operation.updateFilter({
+      categoryId: categoryId ? categoryId as unknown as number : undefined
+    });
+  }, []);
+
+  const onPeriodChange = useCallback((from: string, to: string) => {
+    setDateFrom(from);
+    setDateTo(to);
+    if (from) from = new Date(from).toISOString();
+    if (to) {
+      const d = new Date(to);
+      d.setHours(23, 59, 59, 999);
+      to = d.toISOString();
+    }
+    operation.updateFilter({
+      dateFrom: from,
+      dateTo: to
+    })
   }, []);
 
   const onLoadMore = useCallback(() => {
@@ -151,28 +231,30 @@ export const OperationList = observer(function OperationList() {
       <section className="flex flex-col gap-6 py-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-2xl font-semibold">Операции</h1>
-          <Button color="primary" onPress={openCreate}>
-            Добавить операцию
-          </Button>
+          <div className="flex gap-3">
+            <ButtonImport />
+            <DesktopOnly contentsOnDesktop>
+              <Button color="primary" onPress={openCreate}>
+                Добавить операцию
+              </Button>
+            </DesktopOnly>
+          </div>
         </div>
 
         <Card className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <AuthorDropdown
               selectedUserId={authorId}
-              onAuthorChange={setAuthorId}
+              onAuthorChange={onAutorChanged}
             />
             <CategoryFilter
               selectedCategoryId={categoryId}
-              onCategoryChange={setCategoryId}
+              onCategoryChange={onCategoryChange}
             />
             <DateRangeFilter
               dateFrom={dateFrom}
               dateTo={dateTo}
-              onPeriodChange={(from, to) => {
-                setDateFrom(from);
-                setDateTo(to);
-              }}
+              onPeriodChange={onPeriodChange}
             />
           </div>
         </Card>
@@ -186,6 +268,7 @@ export const OperationList = observer(function OperationList() {
         )}
 
         <Card className="p-2">
+          <DesktopOnly>
           <Table
             isHeaderSticky
             bottomContent={
@@ -217,7 +300,7 @@ export const OperationList = observer(function OperationList() {
               </div>
             }
               emptyContent="Операций пока нет">
-              {operation.operations.map((op) => {
+              {operation.items.map((op) => {
                 return (
                   <TableRow key={op.id}>
                     <TableCell>
@@ -225,22 +308,7 @@ export const OperationList = observer(function OperationList() {
                     </TableCell>
                     <TableCell>{op.title}</TableCell>
                     <TableCell>
-                      <span
-                        className="inline-flex items-center gap-1.5"
-                        style={{ color: op.categoryColor }}
-                      >
-                        {op.categoryId ? (
-                          <>
-                            <span
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: op.categoryColor }}
-                            />
-                            {op.categoryName}
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </span>
+                      <OperationCategoryLabel op={op} />
                     </TableCell>
                     <TableCell>{op.userName}</TableCell>
                     <TableCell
@@ -248,26 +316,15 @@ export const OperationList = observer(function OperationList() {
                         op.amount < 0 ? "text-danger" : "text-success"
                       }
                     >
-                      {op.amount > 0 ? "+" : ""}
-                      {op.amount.toFixed(2)}
+                      {formatOperationAmount(op.amount)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          onPress={() => openEdit(op)}
-                        >
-                          Изменить
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          color="danger"
-                          onPress={() => handleDelete(op)}
-                        >
-                          Удалить
-                        </Button>
+                        <OperationRowActions
+                          op={op}
+                          onDelete={handleDelete}
+                          onEdit={openEdit}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -275,8 +332,75 @@ export const OperationList = observer(function OperationList() {
               })}
             </TableBody>
           </Table>
+          </DesktopOnly>
+
+          <MobileOnly>
+            {operation.loading && operation.items.length === 0 ? (
+              <MobileDataListState>
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Spinner size="sm" />
+                  Загрузка операций…
+                </span>
+              </MobileDataListState>
+            ) : null}
+
+            {!operation.loading && operation.items.length === 0 ? (
+              <MobileDataListState>Операций пока нет</MobileDataListState>
+            ) : null}
+
+            {operation.items.length > 0 ? (
+              <MobileDataList aria-label="Список операций">
+                {operation.items.map((op) => (
+                  <MobileDataListItem
+                    key={op.id}
+                    description={
+                      <span className="flex flex-col gap-1">
+                        <span>{formatOperationDate(op.createdAt)}</span>
+                        <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <OperationCategoryLabel op={op} />
+                          <span className="text-default-400">·</span>
+                          <span>{op.userName}</span>
+                        </span>
+                      </span>
+                    }
+                    footer={
+                      <OperationRowActions
+                        op={op}
+                        onDelete={handleDelete}
+                        onEdit={openEdit}
+                      />
+                    }
+                    title={op.title}
+                    trailing={
+                      <span
+                        className={clsx(
+                          "font-semibold tabular-nums",
+                          op.amount < 0 ? "text-danger" : "text-success",
+                        )}
+                      >
+                        {formatOperationAmount(op.amount)}
+                      </span>
+                    }
+                  />
+                ))}
+              </MobileDataList>
+            ) : null}
+
+            {operation.hasMore ? (
+              <div className="flex justify-center border-t border-divider px-3 py-3">
+                <Button variant="light" onPress={onLoadMore}>
+                  Ещё
+                </Button>
+              </div>
+            ) : null}
+          </MobileOnly>
         </Card>
       </section>
+
+      <FloatingActionButton
+        aria-label="Добавить операцию"
+        onPress={openCreate}
+      />
 
       <OperationFormModal
         isOpen={modalOpen}

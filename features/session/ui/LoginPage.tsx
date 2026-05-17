@@ -41,22 +41,22 @@ export const LoginPage = observer(function LoginPage() {
         <CardBody className="gap-4 px-6 pb-6">
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <Input
+              isRequired
               label="Email"
               type="email"
               autoComplete="email"
               value={email}
-              onValueChange={setEmail}
-              isRequired
               variant="bordered"
+              onValueChange={setEmail}
             />
             <Input
+              isRequired
               label="Пароль"
               type="password"
               autoComplete="current-password"
               value={password}
-              onValueChange={setPassword}
-              isRequired
               variant="bordered"
+              onValueChange={setPassword}
             />
             {formError ? (
               <p className="text-sm text-danger">{formError}</p>

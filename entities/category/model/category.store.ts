@@ -10,7 +10,6 @@ import type {
   ICategoryListParams,
   ICategoryUpdatePayload,
 } from "@/entities/category/api/types";
-import { categoryLocalStorageApi } from "@/entities/category/api/local-storage";
 import CategoryAPI from '@/entities/category/api/remote';
 import type { IListResult } from "@/shared/api/types";
 
@@ -31,6 +30,9 @@ export class CategoryStore {
   }
 
   async loadCategories(params?: ICategoryListParams): Promise<void> {
+    if (this.categories.length) {
+      return;
+    }
     this.loading = true;
     this.error = null;
     try {
@@ -126,4 +128,3 @@ export class CategoryStore {
 }
 
 export const categoryStore = new CategoryStore();
-

@@ -47,10 +47,10 @@ export function DateRangeFilter({
 
   return (
     <Popover
+      showArrow
       placement="bottom-end"
       isOpen={isOpen}
       onOpenChange={setIsOpen}
-      showArrow
     >
       <PopoverTrigger>
         <Button
@@ -68,17 +68,17 @@ export function DateRangeFilter({
               type="date"
               label="С"
               value={dateFrom}
-              onValueChange={(value) => onPeriodChange(value, dateTo)}
               size="sm"
               classNames={{ base: "max-w-[140px]" }}
+              onValueChange={(value) => onPeriodChange(value, dateTo)}
             />
             <Input
               type="date"
               label="По"
               value={dateTo}
-              onValueChange={(value) => onPeriodChange(dateFrom, value)}
               size="sm"
               classNames={{ base: "max-w-[140px]" }}
+              onValueChange={(value) => onPeriodChange(dateFrom, value)}
             />
           </div>
           <div className="flex flex-wrap gap-1">

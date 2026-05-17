@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { runInAction } from "mobx";
 import type {
   IOperation,
   OperationId,
@@ -6,91 +6,40 @@ import type {
 import type {
   IOperationApi,
   IOperationCreatePayload,
-  IOperationListParams,
   IOperationUpdatePayload,
 } from "@/entities/operation/api/types";
 import OperationRemoteApi from "@/entities/operation/api/remote";
-import { operationLocalStorageApi } from "@/entities/operation/api/local-storage";
-import type { IListParams, IListResult } from "@/shared/api/types";
+import type { IListResult } from "@/shared/api/types";
 
-export class OperationStore {
-  private readonly injectedApi: IOperationApi | null;
+import ListStore, { IListParams as ILParams } from '@/shared/store/list-store';
+import { CategoryType } from "@/entities/category";
 
-  operations: IOperation[] = [];
-  hasMore: boolean = false;
-  listParams: IListParams = {};
-  loading: boolean = false;
-  error: string | null = null;
+interface IFilter {
+  workspaceId?: number;
+  userId?: number;
+  categoryId?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  type?: CategoryType;
+}
 
-  constructor(api?: IOperationApi) {
-    this.injectedApi = api ?? null;
-    makeAutoObservable(this, {}, { autoBind: true });
+export class OperationStore extends ListStore<IOperation, IFilter> {
+
+  keyProperty: string = 'id';
+
+  constructor(private readonly _api: IOperationApi = new OperationRemoteApi()) {
+    super();    
   }
 
-  private resolveApi(): IOperationApi {
-    if (this.injectedApi) {
-      return this.injectedApi;
-    }
-    return typeof window !== "undefined"
-      ? new OperationRemoteApi()
-      : operationLocalStorageApi;
-  }
-
-  async loadOperations(params: IOperationListParams = {}): Promise<void> {
-    this.loading = true;
-    this.error = null;
-    if (!params?.page) {
-      params.page = 0;
-    }
-    try {
-      const result: IListResult<IOperation> = await this.resolveApi().listOperations(params);
-      runInAction(() => {
-        this.operations = result.items;
-        this.hasMore = result.more;
-        this.listParams = params;
-      });
-    } catch (e) {
-      runInAction(() => {
-        this.error =
-          e instanceof Error ? e.message : "Failed to load operations";
-      });
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
-  }
-
-  nextPage(): Promise<void> {
-    if (!this.operations.length) {
-      throw new Error();
-    }
-
-    if (!this.hasMore) {
-      return Promise.resolve();
-    }
-    const params = {
-      ...this.listParams,
-      page: (this.listParams.page || 0) + 1
-    };
-    return this.loadOperations(params);
-  }
-
-  async createOperation(
+  async create(
     payload: IOperationCreatePayload,
   ): Promise<IOperation> {
     this.loading = true;
     this.error = null;
     try {
-      const operation = await this.resolveApi().createOperation(payload);
+      const operation = await this._api.createOperation(payload);
   
-      runInAction(() => {
-        this.operations = [
-  
-          operation,
-          ...this.operations
-        ]
-      });
+      this.addItem(operation);
 
       return operation;
     } catch (e) {
@@ -106,22 +55,14 @@ export class OperationStore {
     }
   }
 
-  async updateOperation(
+  async update(
     payload: IOperationUpdatePayload,
   ): Promise<IOperation> {
     this.loading = true;
     this.error = null;
     try {
-      const updated = await this.resolveApi().updateOperation(payload);
-
-      runInAction(() => {
-        const idx = this.operations.findIndex((o) => o.id === updated.id);
-  
-        if (idx !== -1) {
-          this.operations[idx] = updated;
-        }
-      });
-
+      const updated = await this._api.updateOperation(payload);
+      this.pathItem(updated.id, updated);
       return updated;
     } catch (e) {
       runInAction(() => {
@@ -136,14 +77,12 @@ export class OperationStore {
     }
   }
 
-  async deleteOperation(id: OperationId): Promise<void> {
+  async delete(id: OperationId): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
-      await this.resolveApi().deleteOperation(id);
-      runInAction(() => {
-        this.operations = this.operations.filter((o) => o.id !== id);
-      });
+      await this._api.deleteOperation(id);
+      this.deleteItem(id);
     } catch (e) {
       runInAction(() => {
         this.error =
@@ -155,6 +94,29 @@ export class OperationStore {
         this.loading = false;
       });
     }
+  }
+
+  protected _fetchItems(params: ILParams<IFilter>): Promise<IListResult<IOperation>> {
+
+    const {
+      workspaceId,
+      userId,
+      categoryId,
+      dateFrom,
+      dateTo,
+      type
+    } = params.filter;
+
+    return this._api.listOperations({
+      workspaceId,
+      userId,
+      categoryId,
+      dateFrom,
+      dateTo,
+      type,
+      page: params.navigation?.page,
+      limit: params.navigation?.limit
+    });
   }
 }
 
