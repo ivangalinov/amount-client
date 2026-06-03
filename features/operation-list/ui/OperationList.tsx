@@ -193,10 +193,10 @@ export const OperationList = observer(function OperationList() {
     setOperationType(selectedKey);
   }, []);
 
-  const onAutorChanged = useCallback((authorId: number) => {
+  const onAutorChanged = useCallback((authorId: number | "") => {
     setAuthorId(authorId);
     operation.updateFilter({
-      userId: authorId
+      userId: authorId === "" ? undefined : authorId,
     });
   }, []);
 

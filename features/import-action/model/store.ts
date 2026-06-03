@@ -1,4 +1,7 @@
-import { IOperationImportRow } from "@/entities/operation/api/types";
+import {
+  IOperationImportRow,
+  OperationImportSource,
+} from "@/entities/operation/api/types";
 import { makeAutoObservable, runInAction } from "mobx";
 import { createContext, useContext } from "react";
 import APIClient from "@/entities/operation/api/remote";
@@ -66,7 +69,10 @@ export default class ImportOperationStore {
         makeAutoObservable(this, {}, { autoBind: true });
     }
 
-    async parseFile(file: File, source: string): Promise<void> {
+    async parseFile(
+        file: File,
+        source: OperationImportSource,
+    ): Promise<void> {
         runInAction(() => {
             this.inProgress = true;
             this.importError = null;

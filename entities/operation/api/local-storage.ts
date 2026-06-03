@@ -12,6 +12,7 @@ import type { CategoryId } from "@/entities/category/model/types";
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
 import type { IListResult } from "@/shared/api/types";
+import { paginateList } from "@/shared/api/paginate";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const OPERATIONS_KEY = "amount:operations";
@@ -62,19 +63,6 @@ function sortByCreatedDesc(operations: IOperation[]): IOperation[] {
   );
 }
 
-function paginate<T>(items: T[], params?: IOperationListParams): IListResult<T> {
-  const { limit, offset } = params ?? {};
-  if (limit == null && offset == null) {
-    return { items, total: items.length };
-  }
-  const start = offset ?? 0;
-  const end = limit != null ? start + limit : undefined;
-  return {
-    items: items.slice(start, end),
-    total: items.length,
-  };
-}
-
 export const operationLocalStorageApi: IOperationApi = {
   async listOperations(
     params?: IOperationListParams,
@@ -82,7 +70,7 @@ export const operationLocalStorageApi: IOperationApi = {
     const all = await readOperations();
     const filtered = filterOperations(all, params);
     const sorted = sortByCreatedDesc(filtered);
-    return paginate(sorted, params);
+    return paginateList(sorted, params);
   },
 
   async getOperationById(id: OperationId): Promise<IOperation | null> {
@@ -105,8 +93,11 @@ export const operationLocalStorageApi: IOperationApi = {
       id: nextId,
       amount: payload.amount,
       categoryId: payload.categoryId as CategoryId,
+      categoryName: "",
+      categoryColor: "",
       title: payload.title,
       userId: (payload.userId ?? 1) as UserId,
+      userName: "",
       workspaceId: payload.workspaceId as WorkspaceId,
       createdAt,
     };

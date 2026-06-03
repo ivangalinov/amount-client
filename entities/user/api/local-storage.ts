@@ -101,7 +101,9 @@ export const userLocalStorageApi: IUserApi = {
   async login(email: string, _password: string): Promise<IUser> {
     const users = await readUsers();
     const normalized = email.trim().toLowerCase();
-    let u = users.find((x) => x.email.toLowerCase() === normalized);
+    let u = users.find(
+      (x) => x.email != null && x.email.toLowerCase() === normalized,
+    );
     if (!u) {
       const nextId = users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1;
       u = {
@@ -123,7 +125,11 @@ export const userLocalStorageApi: IUserApi = {
   }): Promise<IUser> {
     const users = await readUsers();
     const normalized = payload.email.trim().toLowerCase();
-    if (users.some((x) => x.email.toLowerCase() === normalized)) {
+    if (
+      users.some(
+        (x) => x.email != null && x.email.toLowerCase() === normalized,
+      )
+    ) {
       throw new Error("Email already registered");
     }
     const nextId = users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1;

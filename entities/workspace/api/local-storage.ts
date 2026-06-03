@@ -4,13 +4,21 @@ import type {
   IWorkspaceUser,
 } from "@/entities/workspace/model/types";
 import type { IWorkspaceApi } from "@/entities/workspace/api/types";
-import type { UserId } from "@/entities/user/model/types";
+import type { IUser, UserId } from "@/entities/user/model/types";
 import type { IListParams, IListResult } from "@/shared/api/types";
+import { paginateList } from "@/shared/api/paginate";
 import { keyValueStorage } from "@/shared/api/local-storage";
 
 const WORKSPACES_KEY = "amount:workspaces";
 const WORKSPACE_USERS_KEY = "amount:workspaceUsers";
 const ACTIVE_WORKSPACE_KEY = "amount:activeWorkspace";
+const USERS_KEY = "amount:users";
+
+interface IWorkspaceMembership {
+  id: number;
+  workspaceId: WorkspaceId;
+  userId: UserId;
+}
 
 const DEFAULT_WORKSPACE_NAME = "Личный";
 
@@ -28,19 +36,6 @@ async function writeJson<T>(key: string, value: T): Promise<void> {
   await keyValueStorage.setItem(key, JSON.stringify(value));
 }
 
-function paginate<T>(items: T[], params?: IListParams): IListResult<T> {
-  const { limit, offset } = params ?? {};
-  if (limit == null && offset == null) {
-    return { items, total: items.length };
-  }
-  const start = offset ?? 0;
-  const end = limit != null ? start + limit : undefined;
-  return {
-    items: items.slice(start, end),
-    total: items.length,
-  };
-}
-
 async function readWorkspaces(): Promise<IWorkspace[]> {
   return (await readJson<IWorkspace[]>(WORKSPACES_KEY)) ?? [];
 }
@@ -49,12 +44,26 @@ async function writeWorkspaces(items: IWorkspace[]): Promise<void> {
   await writeJson(WORKSPACES_KEY, items);
 }
 
-async function readWorkspaceUsers(): Promise<IWorkspaceUser[]> {
-  return (await readJson<IWorkspaceUser[]>(WORKSPACE_USERS_KEY)) ?? [];
+async function readMemberships(): Promise<IWorkspaceMembership[]> {
+  return (await readJson<IWorkspaceMembership[]>(WORKSPACE_USERS_KEY)) ?? [];
 }
 
-async function writeWorkspaceUsers(items: IWorkspaceUser[]): Promise<void> {
+async function writeMemberships(items: IWorkspaceMembership[]): Promise<void> {
   await writeJson(WORKSPACE_USERS_KEY, items);
+}
+
+async function resolveUserName(userId: UserId): Promise<string> {
+  const users = (await readJson<IUser[]>(USERS_KEY)) ?? [];
+  return users.find((u) => u.id === userId)?.name ?? `User ${userId}`;
+}
+
+async function membershipToWorkspaceUser(
+  membership: IWorkspaceMembership,
+): Promise<IWorkspaceUser> {
+  return {
+    id: membership.id,
+    name: await resolveUserName(membership.userId),
+  };
 }
 
 const CURRENT_USER_KEY = "amount:currentUser";
@@ -76,16 +85,16 @@ async function ensureDefaultWorkspace(): Promise<IWorkspace> {
   if (currentUserIdRaw) {
     const userId = Number(currentUserIdRaw);
     if (Number.isFinite(userId)) {
-      const wsUsers = await readWorkspaceUsers();
-      const nextWuId = wsUsers.length
-        ? Math.max(...wsUsers.map((wu) => wu.id)) + 1
+      const memberships = await readMemberships();
+      const nextWuId = memberships.length
+        ? Math.max(...memberships.map((wu) => wu.id)) + 1
         : 1;
-      wsUsers.push({
+      memberships.push({
         id: nextWuId,
         workspaceId: workspace.id,
         userId,
       });
-      await writeWorkspaceUsers(wsUsers);
+      await writeMemberships(memberships);
     }
   }
 
@@ -99,7 +108,7 @@ export const workspaceLocalStorageApi: IWorkspaceApi = {
       await ensureDefaultWorkspace();
       workspaces = await readWorkspaces();
     }
-    return paginate(workspaces, params);
+    return paginateList(workspaces, params);
   },
 
   async createWorkspace(payload: { name: string }): Promise<IWorkspace> {
@@ -151,34 +160,37 @@ export const workspaceLocalStorageApi: IWorkspaceApi = {
   },
 
   async listWorkspaceUsers(workspaceId: WorkspaceId): Promise<IWorkspaceUser[]> {
-    const wsUsers = await readWorkspaceUsers();
-    return wsUsers.filter((wu) => wu.workspaceId === workspaceId);
+    const memberships = await readMemberships();
+    const inWorkspace = memberships.filter(
+      (m) => m.workspaceId === workspaceId,
+    );
+    return Promise.all(inWorkspace.map(membershipToWorkspaceUser));
   },
 
   async addUserToWorkspace(payload: {
     workspaceId: WorkspaceId;
     userId: UserId;
   }): Promise<IWorkspaceUser> {
-    const wsUsers = await readWorkspaceUsers();
-    const nextId = wsUsers.length
-      ? Math.max(...wsUsers.map((w) => w.id)) + 1
+    const memberships = await readMemberships();
+    const nextId = memberships.length
+      ? Math.max(...memberships.map((w) => w.id)) + 1
       : 1;
 
-    const record: IWorkspaceUser = {
+    const record: IWorkspaceMembership = {
       id: nextId,
       workspaceId: payload.workspaceId,
       userId: payload.userId,
     };
 
-    wsUsers.push(record);
-    await writeWorkspaceUsers(wsUsers);
-    return record;
+    memberships.push(record);
+    await writeMemberships(memberships);
+    return membershipToWorkspaceUser(record);
   },
 
   async removeUserFromWorkspace(id: number): Promise<void> {
-    const wsUsers = await readWorkspaceUsers();
-    const next = wsUsers.filter((w) => w.id !== id);
-    await writeWorkspaceUsers(next);
+    const memberships = await readMemberships();
+    const next = memberships.filter((w) => w.id !== id);
+    await writeMemberships(next);
   },
 };
 
