@@ -1,4 +1,5 @@
 import type { IListResult } from "@/shared/api/types";
+import { paginateList } from "@/shared/api/paginate";
 import {
   type ICategory,
   type CategoryId,
@@ -97,21 +98,22 @@ export default class RemoteCategoryApi implements ICategoryApi {
       items = items.filter((c) => c.userId === params.userId);
     }
 
-    const total =
-      filteredByWorkspace || filteredByUser
-        ? items.length
-        : (raw.total ?? items.length);
-
-    const offset = params?.offset ?? 0;
-    const limit = params?.limit;
-    let page = items;
-    if (limit != null && limit > 0) {
-      page = items.slice(offset, offset + limit);
-    } else if (offset > 0) {
-      page = items.slice(offset);
+    if (filteredByWorkspace || filteredByUser) {
+      return paginateList(items, params);
     }
 
-    return { items: page, total };
+    const limit = params?.limit;
+    if (limit == null || limit <= 0) {
+      return { items, more: false };
+    }
+    const page = params?.page ?? 1;
+    const start = (page - 1) * limit;
+    const pageItems = items.slice(start, start + limit);
+    const serverTotal = raw.total ?? items.length;
+    return {
+      items: pageItems,
+      more: start + pageItems.length < serverTotal,
+    };
   }
 
   async getCategoryById(key: CategoryId): Promise<ICategory | null> {

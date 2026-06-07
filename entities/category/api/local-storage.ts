@@ -7,6 +7,7 @@ import type { ICategoryApi, ICategoryCreatePayload, ICategoryListParams, ICatego
 import type { WorkspaceId } from "@/entities/workspace/model/types";
 import type { UserId } from "@/entities/user/model/types";
 import type { IListResult } from "@/shared/api/types";
+import { paginateList } from "@/shared/api/paginate";
 
 import { keyValueStorage } from "@/shared/api/local-storage";
 
@@ -45,26 +46,13 @@ function filterCategories(
   });
 }
 
-function paginate<T>(items: T[], params?: ICategoryListParams): IListResult<T> {
-  const { limit, offset } = params ?? {};
-  if (limit == null && offset == null) {
-    return { items, total: items.length };
-  }
-  const start = offset ?? 0;
-  const end = limit != null ? start + limit : undefined;
-  return {
-    items: items.slice(start, end),
-    total: items.length,
-  };
-}
-
 export const categoryLocalStorageApi: ICategoryApi = {
   async listCategories(
     params?: ICategoryListParams,
   ): Promise<IListResult<ICategory>> {
     const all = await readCategories();
     const filtered = filterCategories(all, params);
-    return paginate(filtered, params);
+    return paginateList(filtered, params);
   },
 
   async getCategoryById(id: CategoryId): Promise<ICategory | null> {
