@@ -1,7 +1,16 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+# Меньше параллельных загрузок и фоновых задач — ниже пик RAM при npm на слабом VPS.
+ENV NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_MAXSOCKETS=1
+COPY package*.json ./
+RUN if [ -f package-lock.json ]; then \
+      npm ci --no-audit --no-fund; \
+    else \
+      npm install --no-audit --no-fund; \
+    fi
 
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -9,7 +18,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ARG CATEGORY_API_INTERNAL_URL=http://api:8000
-ENV CATEGORY_API_INTERNAL_URL=${CATEGORY_API_INTERNAL_URL}
+ENV CATEGORY_API_INTERNAL_URL=${CATEGORY_API_INTERNAL_URL} \
+    NODE_OPTIONS=--max-old-space-size=1024 \
+    NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
