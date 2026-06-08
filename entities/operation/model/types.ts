@@ -16,4 +16,3 @@ export interface IOperation {
   workspaceId: WorkspaceId;
   createdAt: string;
 }
-

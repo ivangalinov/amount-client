@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Button } from "@heroui/button";
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { FORM_MODAL_BODY_CLASS, FormModal } from "@/shared/ui/form-modal";
 import { Radio, RadioGroup } from "@heroui/radio";
 import type {
   OperationImportSource,
@@ -45,7 +46,7 @@ const ActionSettings = observer((props: ISettingsProps) => {
   return (
     <>
       <ModalHeader>Импорт операций</ModalHeader>
-      <ModalBody className="gap-4">
+      <ModalBody className={FORM_MODAL_BODY_CLASS}>
         {store.importError && (
           <p className="text-sm text-danger" role="alert">
             {store.importError}
@@ -108,7 +109,7 @@ const ActionImport = observer(function ActionImport() {
         Импорт
       </Button>
 
-      <Modal
+      <FormModal
         isOpen={sourceModalOpen}
         onOpenChange={(open) => {
           setSourceModalOpen(open);
@@ -119,9 +120,9 @@ const ActionImport = observer(function ActionImport() {
             <ActionSettings onExtractItems={onExtractItems} onClose={onClose} />
           )}
         </ModalContent>
-      </Modal>
+      </FormModal>
 
-      <Modal
+      <FormModal
         isOpen={previewModalOpen}
         size="5xl"
         onOpenChange={(open) => {
@@ -133,7 +134,7 @@ const ActionImport = observer(function ActionImport() {
             <Preview onClose={onClose} />
           )}
         </ModalContent>
-      </Modal>
+      </FormModal>
     </>
   );
 });

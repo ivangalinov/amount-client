@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import {
-  Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
@@ -12,7 +11,9 @@ import {
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
+import { usePrefersFinePointer } from "@/shared/lib/use-prefers-fine-pointer";
 import { useRootStore } from "@/shared/store/root-store";
+import { FORM_MODAL_BODY_CLASS, FormModal } from "@/shared/ui/form-modal";
 import type { IOperation } from "@/entities/operation/model/types";
 import type { ICategory } from "@/entities/category/model/types";
 
@@ -43,6 +44,7 @@ const OperationFormModal = observer(function OperationFormModal({
   const [categoryError, setCategoryError] = useState<string | null>(null);
 
   const isEdit = editOperation != null;
+  const prefersFinePointer = usePrefersFinePointer();
   const categories: ICategory[] = categoryStore.categories;
 
   useEffect(() => {
@@ -129,21 +131,21 @@ const OperationFormModal = observer(function OperationFormModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <FormModal isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalContent>
         {(onCloseModal) => (
           <>
             <ModalHeader>
               {isEdit ? "Редактировать операцию" : "Новая операция"}
             </ModalHeader>
-            <ModalBody className="gap-4">
+            <ModalBody className={FORM_MODAL_BODY_CLASS}>
               {error && (
                 <p className="text-sm text-danger" role="alert">
                   {error}
                 </p>
               )}
               <Input
-                autoFocus
+                autoFocus={prefersFinePointer}
                 type="number"
                 label="Сумма"
                 placeholder="например -500 или 1000"
@@ -211,7 +213,7 @@ const OperationFormModal = observer(function OperationFormModal({
           </>
         )}
       </ModalContent>
-    </Modal>
+    </FormModal>
   );
 });
 

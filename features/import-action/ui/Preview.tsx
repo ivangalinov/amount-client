@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Switch } from "@heroui/switch";
 import { Input } from "@heroui/input";
 import { ModalBody, ModalFooter, ModalHeader } from "@heroui/modal";
+import { FORM_MODAL_BODY_CLASS } from "@/shared/ui/form-modal";
 import type {
     OperationImportSource,
 } from "@/entities/operation/api/types";
@@ -171,7 +172,7 @@ const Preview = observer((props: IPreviewProps) => {
             <ModalHeader>
                 Распознанные операции ({store.selectedCount}/{store.items.length})
             </ModalHeader>
-            <ModalBody className="max-h-[70vh] overflow-y-auto gap-4">
+            <ModalBody className={FORM_MODAL_BODY_CLASS}>
                 {store.validateError && (
                     <p className="text-sm text-danger" role="alert">
                         {store.validateError}

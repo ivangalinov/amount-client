@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import {
-  Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
@@ -12,7 +11,9 @@ import {
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
+import { usePrefersFinePointer } from "@/shared/lib/use-prefers-fine-pointer";
 import { useRootStore } from "@/shared/store/root-store";
+import { FORM_MODAL_BODY_CLASS, FormModal } from "@/shared/ui/form-modal";
 import type { ICategory } from "@/entities/category/model/types";
 import { CategoryType } from "@/entities/category/model/types";
 
@@ -43,6 +44,7 @@ const CategoryFormModal = observer(function CategoryFormModal({
   const [nameError, setNameError] = useState<string | null>(null);
 
   const isEdit = editCategory != null;
+  const prefersFinePointer = usePrefersFinePointer();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -105,21 +107,21 @@ const CategoryFormModal = observer(function CategoryFormModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <FormModal isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalContent>
         {() => (
           <>
             <ModalHeader>
               {isEdit ? "Редактировать категорию" : "Новая категория"}
             </ModalHeader>
-            <ModalBody className="gap-4">
+            <ModalBody className={FORM_MODAL_BODY_CLASS}>
               {error && (
                 <p className="text-sm text-danger" role="alert">
                   {error}
                 </p>
               )}
               <Input
-                autoFocus
+                autoFocus={prefersFinePointer}
                 label="Название"
                 placeholder="Например: Продукты"
                 value={name}
@@ -183,7 +185,7 @@ const CategoryFormModal = observer(function CategoryFormModal({
           </>
         )}
       </ModalContent>
-    </Modal>
+    </FormModal>
   );
 });
 
