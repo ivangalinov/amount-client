@@ -15,6 +15,7 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useRootStore } from "@/shared/store/root-store";
+import { AppLogo } from "@/shared/ui/app-logo";
 
 export const Navbar = observer(function Navbar() {
   const router = useRouter();
@@ -37,9 +38,7 @@ export const Navbar = observer(function Navbar() {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            {/* <Logo /> */}
-            {/* Logo */}
-            <p className="font-bold text-inherit">Logo</p>
+            <AppLogo />
           </NextLink>
         </NavbarBrand>
         <div className="hidden lg:flex gap-4 justify-start ml-2">

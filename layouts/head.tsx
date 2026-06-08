@@ -1,6 +1,7 @@
 import React from "react";
 import NextHead from "next/head";
 
+import { pwaConfig } from "@/config/pwa";
 import { siteConfig } from "@/config/site";
 
 export const Head = () => {
@@ -15,7 +16,9 @@ export const Head = () => {
         content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
         name="viewport"
       />
-      <link href="/favicon.ico" rel="icon" />
+      <meta content={pwaConfig.themeColor} name="theme-color" />
+      <meta content={siteConfig.name} property="og:site_name" />
+      <meta content="website" property="og:type" />
     </NextHead>
   );
 };

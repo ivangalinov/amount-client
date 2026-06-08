@@ -8,6 +8,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
 
 import { useRootStore } from "@/shared/store/root-store";
+import { AppLogo } from "@/shared/ui/app-logo";
 
 export const LoginPage = observer(function LoginPage() {
   const { user } = useRootStore();
@@ -32,7 +33,8 @@ export const LoginPage = observer(function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-default-100 via-background to-default-200 p-4">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="flex flex-col gap-1 px-6 pt-6">
+        <CardHeader className="flex flex-col items-center gap-3 px-6 pt-6 text-center">
+          <AppLogo iconSize={48} />
           <h1 className="text-2xl font-semibold">Вход</h1>
           <p className="text-sm text-default-500">
             Войдите, чтобы вести учёт доходов и расходов
