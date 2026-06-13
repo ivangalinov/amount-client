@@ -63,13 +63,15 @@ export function ExpensesPieChart({ data, height = 280 }: IExpensesPieChartProps)
             border: "1px solid var(--nextui-colors-default-200)",
           }}
         />
-        <Legend
-          verticalAlign="bottom"
-          height={36}
-          formatter={(value, entry) => (
-            <span className="text-default-700 text-sm">{value}</span>
-          )}
-        />
+        {/* <DesktopOnly>
+          <Legend
+            verticalAlign="bottom"
+            height={36}
+            formatter={(value, _entry) => (
+              <span className="text-default-700 text-sm">{value}</span>
+            )}
+          />
+        </DesktopOnly> */}
       </PieChart>
     </ResponsiveContainer>
   );

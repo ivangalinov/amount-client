@@ -28,7 +28,7 @@ function buildTitle(origin: string): string {
         .split("\n")
         .map((line) => line.trim())
         .find(Boolean);
-    return (firstLine ?? "Импортированная операция").slice(0, 120);
+    return (firstLine ?? "Импортированная операция").slice(0, 70);
 }
 
 function mapImportRow(row: IOperationImportRow, index: number): IEditableImportRow {
@@ -185,26 +185,3 @@ export function useImportStore() {
     }
     return ctx;
 }
-
-//   if (!activeWorkspace) {
-//     return "Сначала выберите рабочее пространство";
-//   }
-//   if (!store.selectedCount) {
-//     return "Выберите хотя бы одну запись для сохранения";
-//   }
-//   for (const row of store.items) {
-//     if (!row.selected) {
-//       continue;
-//     }
-//     if (!row.title.trim()) {
-//       return "У каждой выбранной записи должно быть название";
-//     }
-//     if (!row.categoryId) {
-//       return "У каждой выбранной записи должна быть категория";
-//     }
-//     if (Number.isNaN(Number(row.amount))) {
-//       return "У выбранных записей должна быть корректная сумма";
-//     }
-//   }
-//   return null;
-// };
