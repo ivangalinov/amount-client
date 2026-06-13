@@ -198,7 +198,7 @@ const Preview = observer((props: IPreviewProps) => {
                 </>
             </ModalBody>
             <ModalFooter>
-                <Button variant="light" onPress={() => { }}>
+                <Button variant="light" onPress={props.onClose}>
                     Закрыть
                 </Button>
                 <Button
